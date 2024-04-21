@@ -1,0 +1,12 @@
+
+# IDEs and editors
+/.idea
+.vscode/*
+
+# compiled output
+dist
+tmp
+
+# System Files
+.DS_Store
+Thumbs.db
