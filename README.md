@@ -2,6 +2,10 @@
 
 The goal of the project is still unknown to me, I read the assigment long time ago. But this is the base for it.
 
+## Assignment
+
+You can see the assignment [here](assignment.pdf).
+
 ## Run the code
 
 ```bash
@@ -11,4 +15,8 @@ The goal of the project is still unknown to me, I read the assigment long time a
 ## Stack
 
 routing - [chi](https://github.com/go-chi/chi)
+
+## Let's GO!
+
+![MeAndGo](logo.jpg)
 
