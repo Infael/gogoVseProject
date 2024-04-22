@@ -16,6 +16,10 @@ You can see the assignment [here](assignment.pdf).
 
 routing - [chi](https://github.com/go-chi/chi)
 
+## Contributing
+
+Please follow rules in [CONTRIBUTING.md](./CONTRIBUTING.md)
+
 ## Let's GO!
 
 ![MeAndGo](logo.jpg)
