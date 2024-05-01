@@ -24,3 +24,6 @@ Please follow rules in [CONTRIBUTING.md](./CONTRIBUTING.md)
 
 ![MeAndGo](logo.jpg)
 
+## Links
+
+[Lecture repo](https://github.com/strvcom/backend-go-vse-microservice-development)
