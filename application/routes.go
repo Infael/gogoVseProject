@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 
 	"github.com/Infael/gogoVseProject/controller"
+	"github.com/Infael/gogoVseProject/middlewares"
 )
 
 func (app *App) loadRoutes() {
@@ -18,8 +19,15 @@ func (app *App) loadRoutes() {
 		w.WriteHeader(http.StatusOK)
 	})
 
-	router.Route("/newsletters", app.loadNewslettersRoutes)
-	router.Route("/users", app.loadUserRoutes)
+	router.Group(
+		func(r chi.Router) {
+			r.Use(middlewares.JwtAuthMiddleware)
+			r.Route("/newsletters", app.loadNewslettersRoutes)
+			r.Route("/users", app.loadUserRoutes)
+		},
+	)
+
+	router.Route("/auth", app.loadAuthRoutes)
 
 	app.router = router
 }
@@ -40,9 +48,14 @@ func (app *App) loadNewslettersRoutes(router chi.Router) {
 func (app *App) loadUserRoutes(router chi.Router) {
 	userController := &controller.User{}
 
-	router.Post("/register", userController.Register)
-	router.Post("/login", userController.Login)
 	router.Delete("/", userController.DeleteAccount)
 	router.Post("/reset-password", userController.ResetPassword)
 	router.Get("/newsletters", userController.GetNewsletters)
+}
+
+func (app *App) loadAuthRoutes(router chi.Router) {
+	authController := controller.NewAuthController()
+
+	router.Post("/register", authController.Register)
+	router.Post("/login", authController.Login)
 }

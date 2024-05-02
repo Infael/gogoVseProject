@@ -7,14 +7,6 @@ import (
 
 type User struct{}
 
-func (n *User) Register(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Creating user...")
-}
-
-func (n *User) Login(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Signing in user...")
-}
-
 func (n *User) DeleteAccount(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Deleting user account...")
 }
