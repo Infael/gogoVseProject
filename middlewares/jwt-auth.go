@@ -14,10 +14,10 @@ func JwtAuthMiddleware(next http.Handler) http.Handler {
 		tokens := strings.Split(authHeader, " ")
 
 		if len(tokens) == 2 {
-			cliams, err := auth.VerifyToken(tokens[1])
+			claims, err := auth.VerifyToken(tokens[1])
 			if err == nil {
-				// pass to next claims to next middleware
-				ctx := context.WithValue(r.Context(), "email", cliams["emial"])
+				// pass claims to the next middleware
+				ctx := context.WithValue(r.Context(), "email", claims["email"])
 				next.ServeHTTP(w, r.WithContext(ctx))
 				return
 			}
