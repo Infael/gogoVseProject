@@ -9,12 +9,12 @@ import (
 )
 
 type AuthController struct {
-	authService *auth.AuthService
+	authService auth.AuthService
 }
 
 // NewAuthController creates a new instance of the AuthController struct
 func NewAuthController() *AuthController {
-	return &AuthController{authService: &auth.AuthService{}}
+	return &AuthController{authService: &auth.JwtAuthService{}}
 }
 
 // Login handles the POST /login route and login a new user with the provided credentials

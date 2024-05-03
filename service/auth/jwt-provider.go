@@ -2,13 +2,13 @@ package auth
 
 import (
 	"fmt"
+	"os"
 	"time"
 
 	jwt "github.com/golang-jwt/jwt/v5"
 )
 
-// TODO: hide key
-var secretKey = []byte("secret-key")
+var secretKey = []byte(os.Getenv("JWT_SECRET_KEY"))
 
 func CreateToken(email string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
