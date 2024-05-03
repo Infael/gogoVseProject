@@ -13,9 +13,9 @@ func JwtAuthMiddleware(next http.Handler) http.Handler {
 		authHeader := r.Header.Get("Authorization")
 		tokens := strings.Split(authHeader, " ")
 
-		if(len(tokens) == 2){
+		if len(tokens) == 2 {
 			cliams, err := auth.VerifyToken(tokens[1])
-			if(err == nil) {
+			if err == nil {
 				// pass to next claims to next middleware
 				ctx := context.WithValue(r.Context(), "email", cliams["emial"])
 				next.ServeHTTP(w, r.WithContext(ctx))
@@ -25,4 +25,4 @@ func JwtAuthMiddleware(next http.Handler) http.Handler {
 
 		http.Error(w, "Unauthorized user.", http.StatusUnauthorized)
 	})
-  }
+}

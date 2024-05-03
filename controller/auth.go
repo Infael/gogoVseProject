@@ -8,11 +8,9 @@ import (
 	models "github.com/Infael/gogoVseProject/model"
 )
 
-
-type AuthController struct{
+type AuthController struct {
 	authService *auth.AuthService
 }
-
 
 // NewAuthController creates a new instance of the AuthController struct
 func NewAuthController() *AuthController {
@@ -41,10 +39,10 @@ func (c *AuthController) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Return the custom token to the client
-    if err := helpers.SendResponseStatusOk(w, loginResponse); err != nil {
-        http.Error(w, "Internal error", http.StatusInternalServerError)
-        return
-    }
+	if err := helpers.SendResponseStatusOk(w, loginResponse); err != nil {
+		http.Error(w, "Internal error", http.StatusInternalServerError)
+		return
+	}
 }
 
 // Register handles the POST /register route and creates a new user with the provided credentials
@@ -57,7 +55,6 @@ func (c *AuthController) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-
 	// Register the new user and get a custom token for the user
 	err := c.authService.Register(registerRequest.Email, registerRequest.Password)
 	if err != nil {
@@ -66,8 +63,8 @@ func (c *AuthController) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Return the custom token to the client
-    if err := helpers.SendResponse(w, nil, 204); err != nil {
-        http.Error(w, "Internal error", http.StatusInternalServerError)
-        return
-    }
+	if err := helpers.SendResponse(w, nil, 204); err != nil {
+		http.Error(w, "Internal error", http.StatusInternalServerError)
+		return
+	}
 }
