@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/Infael/gogoVseProject/auth"
+	"github.com/Infael/gogoVseProject/service/auth"
 )
 
 func JwtAuthMiddleware(next http.Handler) http.Handler {

@@ -3,9 +3,9 @@ package controller
 import (
 	"net/http"
 
-	"github.com/Infael/gogoVseProject/auth"
 	"github.com/Infael/gogoVseProject/controller/helpers"
 	models "github.com/Infael/gogoVseProject/model"
+	"github.com/Infael/gogoVseProject/service/auth"
 )
 
 type AuthController struct {
