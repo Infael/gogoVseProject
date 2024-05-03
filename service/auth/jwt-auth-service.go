@@ -3,34 +3,41 @@ package auth
 import (
 	"errors"
 	"log"
+	"net/http"
 
 	"golang.org/x/crypto/bcrypt"
 
 	models "github.com/Infael/gogoVseProject/model"
+	"github.com/Infael/gogoVseProject/repository"
+	"github.com/Infael/gogoVseProject/utils"
 )
 
-type JwtAuthService struct{}
+type JwtAuthService struct {
+	repository *repository.UserRepository
+}
+
+func NewJwtAuthService(repository *repository.UserRepository) *JwtAuthService {
+	return &JwtAuthService{repository: repository}
+}
 
 func (s *JwtAuthService) Login(email, password string) (string, error) {
 	// Get the user from the database
-	// TODO: call DB to get user !!!
-	var hashedPassword, _ = bcrypt.GenerateFromPassword([]byte("test"), bcrypt.DefaultCost)
-	var user = models.User{
-		Id:           123,
-		PasswordHash: string(hashedPassword),
-		Email:        "test",
+	user, err := s.repository.GetUserByEmail(email)
+
+	if err != nil {
+		return "", err
 	}
 
 	// Check if the provided password matches the user's password
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)); err != nil {
-		return "", errors.New("Invalid password or email.")
+		return "", utils.NewError(errors.New("invalid credentials"), http.StatusUnauthorized)
 	}
 
 	// Generate a Firebase custom token for the user
 	token, err := CreateToken(user.Email)
 	if err != nil {
 		log.Printf("failed to generate custom token: %v", err)
-		return "", errors.New("internal server error")
+		return "", utils.InternalServerError(err)
 	}
 
 	return token, nil
@@ -38,34 +45,24 @@ func (s *JwtAuthService) Login(email, password string) (string, error) {
 
 // Register creates a new user with the provided credentials and returns token
 func (s *JwtAuthService) Register(email, password string) error {
-	// Check if the user with the email already exists
-	// TODO: call DB to get user !!!
-	var user = models.User{
-		Id:           0,
-		PasswordHash: "",
-		Email:        "",
-	}
-
-	// TODO: fix condition when DB will be added
-	if user.Id != 0 {
-		return errors.New("user with email already exists")
-	}
-
 	// Generate a hash of the user's password using bcrypt
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		log.Printf("failed to hash password: %v", err)
-		return errors.New("internal server error")
+		return utils.InternalServerError(err)
 	}
-	log.Printf("password hashed: %v", hashedPassword)
 
 	// Create a new user in the database
-	// TODO: create user call DB to create user !!!
-	var newUser = models.User{
-		Id:           uint64(10),
+	newUser := models.User{
 		PasswordHash: string(hashedPassword),
 		Email:        email,
 	}
+
+	_, error := s.repository.CreateUser(&newUser)
+
+	if error != nil {
+		return error
+	}
+
 	log.Printf("new user created in DB: %d, %s, %s", newUser.Id, newUser.Email, newUser.PasswordHash)
 
 	return nil
