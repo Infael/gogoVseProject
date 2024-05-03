@@ -7,5 +7,5 @@ type Post struct {
 	Title      string     `json:"title"`
 	Body       string     `json:"body"`
 	CreatedAt  *time.Time `json:"created_at"`
-	Newsletter uint64     `json:"newsletter_id"`
+	NewsletterId uint64     `json:"newsletter_id"`
 }
