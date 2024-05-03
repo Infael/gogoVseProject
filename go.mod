@@ -14,6 +14,7 @@ require (
 require (
 	github.com/go-playground/validator/v10 v10.20.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
+	github.com/resend/resend-go/v2 v2.6.0
 	golang.org/x/crypto v0.21.0
 	golang.org/x/net v0.22.0 // indirect
 	golang.org/x/sys v0.18.0 // indirect

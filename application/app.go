@@ -3,10 +3,7 @@ package application
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
-
-	"github.com/joho/godotenv"
 )
 
 type App struct {
@@ -14,10 +11,6 @@ type App struct {
 }
 
 func New() *App {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
 	app := &App{}
 
 	app.loadRoutes()
