@@ -18,27 +18,23 @@ func NewResendMailService() *ResendMailService {
 	}
 }
 
-func (rms *ResendMailService) SendMailToListOfUser(users []model.User, mailContent MailContent) []error {
-	errors := []error{}
+func (rms *ResendMailService) SendMailToListOfUser(users []model.User, mailContent MailContent) error {
+	emails := []*resend.SendEmailRequest{}
 
 	for _, user := range users {
-		params := &resend.SendEmailRequest{
+		emails = append(emails, &resend.SendEmailRequest{
 			From:    "newsletter@resend.dev",
 			To:      []string{user.Email},
 			Subject: mailContent.Subject,
 			Html:    mailContent.Html,
-		}
-
-		_, err := rms.client.Emails.Send(params)
-		if err != nil {
-			errors = append(errors, err)
-		}
+		})
 	}
 
-	return errors
+	_, err := rms.client.Batch.Send(emails)
+	return err
 }
 
-func (rms *ResendMailService) SendMailLastNewsletterPost(newsletter model.Newsletter) []error {
+func (rms *ResendMailService) SendMailLastNewsletterPost(newsletter model.Newsletter) error {
 	lastNewsletterPost := newsletter.Posts[len(newsletter.Posts)-1]
 
 	// TODO: add unsubscribe url
