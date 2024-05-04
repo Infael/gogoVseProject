@@ -49,7 +49,6 @@ func (app *App) loadUserRoutes(router chi.Router) {
 	userController := &controller.User{}
 
 	router.Delete("/", userController.DeleteAccount)
-	router.Post("/reset-password", userController.ResetPassword)
 	router.Get("/newsletters", userController.GetNewsletters)
 }
 

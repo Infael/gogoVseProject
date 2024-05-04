@@ -2,39 +2,49 @@ package password
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	"github.com/Infael/gogoVseProject/model"
+	"github.com/Infael/gogoVseProject/repository"
 	"github.com/Infael/gogoVseProject/service/mail"
+	"github.com/Infael/gogoVseProject/utils"
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type PasswordService struct {
-	mailService  mail.MailService
-	redisStorage *redis.Client
+	mailService    mail.MailService
+	redisStorage   *redis.Client
+	userRepository *repository.UserRepository
+}
+
+func NewPasswordService(mailService mail.MailService, redisStorage *redis.Client, userRepository *repository.UserRepository) *PasswordService {
+	return &PasswordService{
+		mailService:    mailService,
+		redisStorage:   redisStorage,
+		userRepository: userRepository,
+	}
 }
 
 func (ps *PasswordService) SendPasswordResetToken(email string) error {
-	// TODO: check if user exist in DB !
-	var hashedPassword, _ = bcrypt.GenerateFromPassword([]byte("test"), bcrypt.DefaultCost)
-	var user = model.User{
-		Id:           123,
-		PasswordHash: string(hashedPassword),
-		Email:        "test",
+	user, err := ps.userRepository.GetUserByEmail(email)
+	if err != nil {
+		return err
 	}
 
 	// generate resetToken and store
 	toBeHashed := user.PasswordHash + user.Email + time.Now().String()
 	resetToken, err := bcrypt.GenerateFromPassword([]byte(toBeHashed), bcrypt.DefaultCost)
 	if err != nil {
-		return errors.New("internal server error")
+		return utils.InternalServerError(err)
 	}
-	ps.redisStorage.SetNX(context.Background(), string(resetToken), user.Email, time.Duration(15*float64(time.Minute)))
+
+	err = ps.redisStorage.Set(context.Background(), string(resetToken), user.Email, 1200).Err()
+	if err != nil {
+		return utils.InternalServerError(err)
+	}
 
 	// send resetToken to user
-	// wtf
 	ps.mailService.SendMailPasswordResetToken(user, string(resetToken))
 
 	return nil
@@ -42,13 +52,33 @@ func (ps *PasswordService) SendPasswordResetToken(email string) error {
 
 func (ps *PasswordService) ResetPasswordWithToken(newPassword, token string) error {
 	// check if token exists
-	result := ps.redisStorage.Get(context.Background(), token)
+	result, err := ps.redisStorage.Get(context.Background(), token).Result()
+	if err != nil {
+		return utils.InternalServerError(err)
+	}
 
-	// TODO: remove token
+	// remove token
+	err = ps.redisStorage.Del(context.Background(), token).Err()
+	if err != nil {
+		return utils.InternalServerError(err)
+	}
 
-	// TODO: generate new pass
+	// generate new password
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return utils.InternalServerError(err)
+	}
 
-	// TODO: send password
+	// set new password
+	user, err := ps.userRepository.GetUserByEmail(result)
+	if err != nil {
+		return err
+	}
+	_, err = ps.userRepository.UpdateUser(&model.User{
+		Email:        user.Email,
+		PasswordHash: string(hashedPassword),
+		Id:           user.Id,
+	})
 
-	return nil
+	return err
 }

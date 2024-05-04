@@ -6,11 +6,14 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/Infael/gogoVseProject/db"
 	"github.com/Infael/gogoVseProject/repository"
 	"github.com/Infael/gogoVseProject/service"
 	"github.com/joho/godotenv"
+	"github.com/redis/go-redis/v9"
+	"gopkg.in/gomail.v2"
 )
 
 type App struct {
@@ -29,6 +32,7 @@ func New() *App {
 		panic(err)
 	}
 
+	// init db
 	dbUser, dbPassword, dbName := os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASSWORD"), os.Getenv("POSTGRES_DB")
 	database, err := db.NewDatabase(dbUser, dbPassword, dbName)
 	if err != nil {
@@ -37,8 +41,26 @@ func New() *App {
 	}
 	app.db = &database
 
+	// init redis
+	redisClient := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "",
+		DB:       0,
+	})
+
+	// init mail dailer
+	provider := os.Getenv("STMP_PROVIDER")
+	port, err := strconv.Atoi(os.Getenv("STMP_PORT"))
+	if err != nil {
+		log.Fatal("failed to stmp server: %v", err)
+		panic(err)
+	}
+	user := os.Getenv("STMP_MAIL")
+	pwd := os.Getenv("STMP_PWD")
+	mailDialer := gomail.NewDialer(provider, port, user, pwd)
+
 	app.repositories = repository.NewRepositories(app.db)
-	app.services = service.NewServices(app.repositories)
+	app.services = service.NewServices(app.repositories, redisClient, mailDialer)
 	app.loadRoutes()
 
 	return app
