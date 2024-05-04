@@ -30,15 +30,15 @@ func New() *App {
 	}
 
 	dbUser, dbPassword, dbName := os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASSWORD"), os.Getenv("POSTGRES_DB")
-	database, err := db.Init(dbUser, dbPassword, dbName)
+	database, err := db.NewDatabase(dbUser, dbPassword, dbName)
 	if err != nil {
 		log.Fatal("failed to connect to database: %v", err)
 		panic(err)
 	}
 	app.db = &database
 
-	app.repositories = repository.Initialize(app.db)
-	app.services = service.Initialize(app.repositories)
+	app.repositories = repository.NewRepositories(app.db)
+	app.services = service.NewServices(app.repositories)
 	app.loadRoutes()
 
 	return app

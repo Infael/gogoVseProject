@@ -9,7 +9,7 @@ type Services struct {
 	AuthService auth.AuthService
 }
 
-func Initialize(repositories *repository.Repositories) *Services {
+func NewServices(repositories *repository.Repositories) *Services {
 	return &Services{
 		AuthService: auth.NewJwtAuthService(repositories.UserRepository),
 	}

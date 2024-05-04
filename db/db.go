@@ -11,7 +11,7 @@ type Database struct {
 	Connection *sql.DB
 }
 
-func Init(username, password, database string) (Database, error) {
+func NewDatabase(username, password, database string) (Database, error) {
 	db := Database{}
 
 	databaseURL := "postgres://" + username + ":" + password + "@localhost/" + database + "?sslmode=disable"

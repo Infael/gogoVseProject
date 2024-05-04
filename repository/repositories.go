@@ -6,7 +6,7 @@ type Repositories struct {
 	UserRepository *UserRepository
 }
 
-func Initialize(db *db.Database) *Repositories {
+func NewRepositories(db *db.Database) *Repositories {
 	return &Repositories{
 		UserRepository: NewUserRepository(db),
 	}
