@@ -54,7 +54,7 @@ func (app *App) loadUserRoutes(router chi.Router) {
 }
 
 func (app *App) loadAuthRoutes(router chi.Router) {
-	authController := controller.NewAuthController()
+	authController := controller.NewAuthController(&app.services.AuthService)
 
 	router.Post("/register", authController.Register)
 	router.Post("/login", authController.Login)

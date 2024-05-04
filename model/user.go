@@ -5,3 +5,7 @@ type User struct {
 	Email        string `json:"email"`
 	PasswordHash string `json:"password_hash"`
 }
+
+type UserList struct {
+	Users []User `json:"users"`
+}
