@@ -6,11 +6,15 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
+	"time"
 
 	"github.com/Infael/gogoVseProject/db"
 	"github.com/Infael/gogoVseProject/repository"
 	"github.com/Infael/gogoVseProject/service"
 	"github.com/joho/godotenv"
+	"github.com/patrickmn/go-cache"
+	"gopkg.in/gomail.v2"
 )
 
 type App struct {
@@ -29,6 +33,7 @@ func New() *App {
 		panic(err)
 	}
 
+	// init db
 	dbUser, dbPassword, dbName := os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASSWORD"), os.Getenv("POSTGRES_DB")
 	database, err := db.NewDatabase(dbUser, dbPassword, dbName)
 	if err != nil {
@@ -37,8 +42,22 @@ func New() *App {
 	}
 	app.db = &database
 
+	// init cache
+	cache := cache.New(15*time.Minute, 20*time.Minute)
+
+	// init mail dailer
+	provider := os.Getenv("STMP_PROVIDER")
+	port, err := strconv.Atoi(os.Getenv("STMP_PORT"))
+	if err != nil {
+		log.Fatal("failed to stmp server: %v", err)
+		panic(err)
+	}
+	user := os.Getenv("STMP_MAIL")
+	pwd := os.Getenv("STMP_PWD")
+	mailDialer := gomail.NewDialer(provider, port, user, pwd)
+
 	app.repositories = repository.NewRepositories(app.db)
-	app.services = service.NewServices(app.repositories)
+	app.services = service.NewServices(app.repositories, cache, mailDialer)
 	app.loadRoutes()
 
 	return app

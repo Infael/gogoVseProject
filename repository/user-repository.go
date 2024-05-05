@@ -44,3 +44,13 @@ func (repository *UserRepository) CreateUser(user *model.User) (model.User, erro
 
 	return *user, nil
 }
+
+func (repository *UserRepository) UpdateUser(user *model.User) (model.User, error) {
+	err := repository.db.Connection.QueryRow("UPDATE users SET email=$1, password_hash=$2 WHERE id = $3;", user.Email, user.PasswordHash, user.Id).Err()
+
+	if err != nil {
+		return *user, utils.InternalServerError(err)
+	}
+
+	return *user, nil
+}

@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"net/mail"
 
 	"github.com/Infael/gogoVseProject/controller/helpers"
 	models "github.com/Infael/gogoVseProject/model"
@@ -56,8 +57,14 @@ func (c *AuthController) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	_, err := mail.ParseAddress(registerRequest.Email)
+	if err := helpers.GetObjectFromJson(r, &registerRequest); err != nil {
+		helpers.SendError(w, r, utils.ErrorBadRequest(err))
+		return
+	}
+
 	// Register the new user and get a custom token for the user
-	err := c.authService.Register(registerRequest.Email, registerRequest.Password)
+	err = c.authService.Register(registerRequest.Email, registerRequest.Password)
 	if err != nil {
 		helpers.SendError(w, r, err)
 		return

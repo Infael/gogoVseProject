@@ -11,4 +11,6 @@ type MailService interface {
 	SendMailToListOfUsers(users []model.User, mailContent MailContent) error
 
 	SendMailLastNewsletterPost(newsletter model.Newsletter) error
+
+	SendMailPasswordResetToken(user model.User, token string) error
 }
