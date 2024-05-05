@@ -27,7 +27,7 @@ func (app *App) loadRoutes() {
 		},
 	)
 
-	// anon routes
+	// public routes
 	router.Route("/auth", app.loadAuthRoutes)
 	router.Route("/password", app.loadPasswordRoutes)
 

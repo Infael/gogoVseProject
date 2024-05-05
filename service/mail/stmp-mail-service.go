@@ -53,7 +53,7 @@ func (sms *StmpMailService) SendMailLastNewsletterPost(newsletter model.Newslett
 }
 
 func (sms *StmpMailService) SendMailPasswordResetToken(user model.User, token string) error {
-	// TODO: add unsubscribe url
+	// TODO: add correct url
 	html := fmt.Sprintf(
 		"<h2>Password Reset Request</h2><p>We received a request to reset your password. If you did not request this, you can ignore this email.</p><hr/><p><strong>To reset your password, please click the link below:</strong> <br/><br/><a href=\"%s\">Reset Password</a></p>",
 		"http://localhost:3000/password/reset/"+token,

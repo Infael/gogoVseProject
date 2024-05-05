@@ -4,7 +4,6 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
-	"log"
 	"math/rand"
 	"strconv"
 	"time"
@@ -70,14 +69,12 @@ func (ps *PasswordService) ResetPasswordWithToken(newPassword, token string) err
 	// generate new password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
 	if err != nil {
-		log.Printf("XD!121: %s", err)
 		return utils.InternalServerError(err)
 	}
 
 	// set new password
 	user, err := ps.userRepository.GetUserByEmail(result.(string))
 	if err != nil {
-		log.Printf("XD!11: %s", err)
 		return err
 	}
 	_, err = ps.userRepository.UpdateUser(&model.User{
