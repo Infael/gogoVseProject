@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Infael/gogoVseProject/model"
+	"github.com/Infael/gogoVseProject/utils"
 	gomail "gopkg.in/gomail.v2"
 )
 
@@ -26,7 +27,7 @@ func (sms *StmpMailService) SendMailToListOfUsers(users []model.User, mailConten
 		msg.SetBody("text/html", mailContent.Html)
 
 		if err := sms.dialer.DialAndSend(msg); err != nil {
-			return err
+			return utils.InternalServerError(err)
 		}
 	}
 
@@ -55,7 +56,7 @@ func (sms *StmpMailService) SendMailPasswordResetToken(user model.User, token st
 	// TODO: add unsubscribe url
 	html := fmt.Sprintf(
 		"<h2>Password Reset Request</h2><p>We received a request to reset your password. If you did not request this, you can ignore this email.</p><hr/><p><strong>To reset your password, please click the link below:</strong> <br/><br/><a href=\"%s\">Reset Password</a></p>",
-		"www.dothisshitlater.com",
+		"http://localhost:3000/password/reset/"+token,
 	)
 
 	return sms.SendMailToListOfUsers([]model.User{user}, MailContent{

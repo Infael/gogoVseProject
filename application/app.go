@@ -7,12 +7,13 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/Infael/gogoVseProject/db"
 	"github.com/Infael/gogoVseProject/repository"
 	"github.com/Infael/gogoVseProject/service"
 	"github.com/joho/godotenv"
-	"github.com/redis/go-redis/v9"
+	"github.com/patrickmn/go-cache"
 	"gopkg.in/gomail.v2"
 )
 
@@ -41,12 +42,8 @@ func New() *App {
 	}
 	app.db = &database
 
-	// init redis
-	redisClient := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "",
-		DB:       0,
-	})
+	// init cache
+	cache := cache.New(15*time.Minute, 20*time.Minute)
 
 	// init mail dailer
 	provider := os.Getenv("STMP_PROVIDER")
@@ -60,7 +57,7 @@ func New() *App {
 	mailDialer := gomail.NewDialer(provider, port, user, pwd)
 
 	app.repositories = repository.NewRepositories(app.db)
-	app.services = service.NewServices(app.repositories, redisClient, mailDialer)
+	app.services = service.NewServices(app.repositories, cache, mailDialer)
 	app.loadRoutes()
 
 	return app

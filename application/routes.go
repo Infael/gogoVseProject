@@ -27,7 +27,9 @@ func (app *App) loadRoutes() {
 		},
 	)
 
+	// anon routes
 	router.Route("/auth", app.loadAuthRoutes)
+	router.Route("/password", app.loadPasswordRoutes)
 
 	app.router = router
 }
@@ -57,4 +59,11 @@ func (app *App) loadAuthRoutes(router chi.Router) {
 
 	router.Post("/register", authController.Register)
 	router.Post("/login", authController.Login)
+}
+
+func (app *App) loadPasswordRoutes(router chi.Router) {
+	passwordController := controller.NewPasswordController(&app.services.PasswordService)
+
+	router.Post("/request-reset", passwordController.SendResetPasswordEmail)
+	router.Post("/reset/{token}", passwordController.SetNewPasswordWithResetToken)
 }

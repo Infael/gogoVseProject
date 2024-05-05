@@ -5,7 +5,7 @@ import (
 	"github.com/Infael/gogoVseProject/service/auth"
 	"github.com/Infael/gogoVseProject/service/mail"
 	"github.com/Infael/gogoVseProject/service/password"
-	"github.com/redis/go-redis/v9"
+	"github.com/patrickmn/go-cache"
 	"gopkg.in/gomail.v2"
 )
 
@@ -15,14 +15,14 @@ type Services struct {
 	MailService     mail.MailService
 }
 
-func NewServices(repositories *repository.Repositories, redisClient *redis.Client, dialer *gomail.Dialer) *Services {
+func NewServices(repositories *repository.Repositories, cache *cache.Cache, dialer *gomail.Dialer) *Services {
 	mailService := mail.NewStmpMailService(dialer)
 
 	return &Services{
 		AuthService: auth.NewJwtAuthService(repositories.UserRepository),
 		PasswordService: *password.NewPasswordService(
 			mailService,
-			redisClient,
+			cache,
 			repositories.UserRepository,
 		),
 	}

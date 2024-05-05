@@ -20,8 +20,7 @@ require (
 	github.com/go-playground/validator/v10 v10.20.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/lib/pq v1.10.9
-	github.com/redis/go-redis/v9 v9.5.1
-	github.com/resend/resend-go/v2 v2.6.0
+	github.com/patrickmn/go-cache v2.1.0+incompatible
 	golang.org/x/crypto v0.21.0
 	golang.org/x/net v0.22.0 // indirect
 	golang.org/x/sys v0.18.0 // indirect
