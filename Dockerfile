@@ -42,10 +42,6 @@ RUN go build \
 # The scratch base image welcomes us as a blank canvas for our prod stage.
 FROM scratch
 
-# By configuring the GIN_MODE environment variable,
-# we determine whether our application will run in release or debug mode.
-ENV GIN_MODE=release
-
 WORKDIR /
 
 # We copy the passwd file, essential for our non-root user
