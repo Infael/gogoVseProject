@@ -64,3 +64,5 @@ export POSTGRESQL_URL="postgres://postgres_user:user@localhost:5432/godb?sslmode
 migrate -database {$POSTGRESQL_URL} -path db/migrations up
 ```
 
+
+export POSTGRESQL_URL="host=aws-0-eu-central-1.pooler.supabase.com port=5432 user=postgres.itzckmthyazjhgqkptum password=jIj22fbwM1OqRBAw dbname=postgres sslmode=disable"
