@@ -30,7 +30,7 @@ Please follow rules in [CONTRIBUTING.md](./CONTRIBUTING.md)
 
 ## Create db locally
 
-I'm doing something soooo wrong... it can't be that complicated
+I'm doing something soooo wrong... it can't be that complicated.
 
 - install postgres
 
@@ -58,11 +58,11 @@ CREATE DATABASE godb WITH OWNER postgres_user ENCODING='UTF8';
 - run migrations
 
 ```bash
-# install tool for go migrations
-brew install golang-migrate
-export POSTGRESQL_URL="postgres://postgres_user:user@localhost:5432/godb?sslmode=disable"
-migrate -database {$POSTGRESQL_URL} -path db/migrations up
+  POSTGRES_RUN_MIGRATIONS=true go run main.go
 ```
 
+## Run on production
 
-export POSTGRESQL_URL="host=aws-0-eu-central-1.pooler.supabase.com port=5432 user=postgres.itzckmthyazjhgqkptum password=jIj22fbwM1OqRBAw dbname=postgres sslmode=disable"
+```bash
+  PROD=true go run main.go
+```
