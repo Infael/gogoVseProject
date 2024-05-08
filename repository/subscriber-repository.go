@@ -9,30 +9,27 @@ type SubscriberRepository struct {
 	db *db.Database
 }
 
-// TODO: predelat sawgger na many to many vztah s newsletterem !!!
 // TODO: tohle je spatne mel vztah by mel by many to many
-// TODO: subscriber model chybi
 func NewSubscriberRepository(db *db.Database) *SubscriberRepository {
 	return &SubscriberRepository{db: db}
 }
 
-// TODO: vymenit post za subs model
-func (repository *SubscriberRepository) CreateSubscriber(post *model.Post) (model.Post, error) {
+func (repository *SubscriberRepository) CreateSubscriber(subscriber *model.Subscriber) (model.Subscriber, error) {
 	// TODO:
-	return model.Post{}, nil
+	return model.Subscriber{}, nil
 }
 
-func (repository *SubscriberRepository) DeleteAllSubscriberOfNewsletters(newsletterId, subscriberId uint64) ([]model.Post, error) {
+func (repository *SubscriberRepository) DeleteAllSubscriberOfNewsletter(newsletterId, subscriberId uint64) ([]model.Subscriber, error) {
 	// TODO:
-	return []model.Post{}, nil
+	return []model.Subscriber{}, nil
 }
 
-func (repository *SubscriberRepository) DeleteAllSubscribersOfNewsletters(newsletterId uint64) ([]model.Post, error) {
+func (repository *SubscriberRepository) DeleteAllSubscribersOfNewsletter(newsletterId uint64) ([]model.Subscriber, error) {
 	// TODO:
-	return []model.Post{}, nil
+	return []model.Subscriber{}, nil
 }
 
-func (repository *SubscriberRepository) GetAllSubscribersOfNewsletters(newsletterId uint64) ([]model.Newsletter, error) {
+func (repository *SubscriberRepository) GetAllSubscribersOfNewsletters(newsletterId uint64) ([]model.Subscriber, error) {
 	// TODO:
-	return []model.Newsletter{}, nil
+	return []model.Subscriber{}, nil
 }
