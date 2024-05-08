@@ -54,3 +54,13 @@ func (repository *UserRepository) UpdateUser(user *model.User) (model.User, erro
 
 	return *user, nil
 }
+
+func (repository *UserRepository) DeleteUser(id uint64) (model.User, error) {
+	// TODO:
+	return model.User{}, nil
+}
+
+func (repository *UserRepository) GetAllUsers() ([]model.User, error) {
+	// TODO:
+	return []model.User{}, nil
+}
