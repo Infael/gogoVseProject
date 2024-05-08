@@ -14,22 +14,22 @@ func NewSubscriberRepository(db *db.Database) *SubscriberRepository {
 	return &SubscriberRepository{db: db}
 }
 
-func (repository *SubscriberRepository) CreateSubscriber(subscriber *model.Subscriber) (model.Subscriber, error) {
+func (repository *SubscriberRepository) CreateSubscriber(subscriber *model.Subscribe) (model.SubscriberAll, error) {
 	// TODO:
-	return model.Subscriber{}, nil
+	return model.SubscriberAll{}, nil
 }
 
-func (repository *SubscriberRepository) DeleteAllSubscriberOfNewsletter(newsletterId, subscriberId uint64) ([]model.Subscriber, error) {
+func (repository *SubscriberRepository) DeleteAllSubscriberOfNewsletter(newsletterId, subscriberId uint64) ([]model.SubscriberAll, error) {
 	// TODO:
-	return []model.Subscriber{}, nil
+	return []model.SubscriberAll{}, nil
 }
 
-func (repository *SubscriberRepository) DeleteAllSubscribersOfNewsletter(newsletterId uint64) ([]model.Subscriber, error) {
+func (repository *SubscriberRepository) DeleteAllSubscribersOfNewsletter(newsletterId uint64) ([]model.SubscriberAll, error) {
 	// TODO:
-	return []model.Subscriber{}, nil
+	return []model.SubscriberAll{}, nil
 }
 
-func (repository *SubscriberRepository) GetAllSubscribersOfNewsletters(newsletterId uint64) ([]model.Subscriber, error) {
+func (repository *SubscriberRepository) GetAllSubscribersOfNewsletters(newsletterId uint64) ([]model.SubscriberAll, error) {
 	// TODO:
-	return []model.Subscriber{}, nil
+	return []model.SubscriberAll{}, nil
 }

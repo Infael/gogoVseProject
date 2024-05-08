@@ -22,7 +22,7 @@ func NewAuthController(authService *auth.AuthService) *AuthController {
 // Login handles the POST /login route and login a new user with the provided credentials
 func (c *AuthController) Login(w http.ResponseWriter, r *http.Request) {
 	// Get the email and password from the request body
-	var loginRequest models.LoginRequest
+	var loginRequest models.LoginCredentials
 
 	if err := helpers.GetObjectFromJson(r, &loginRequest); err != nil {
 		helpers.SendError(w, r, err)
@@ -36,7 +36,7 @@ func (c *AuthController) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var loginResponse = models.LoginResponse{
+	var loginResponse = models.JwtToken{
 		Token: customToken,
 	}
 
@@ -50,7 +50,7 @@ func (c *AuthController) Login(w http.ResponseWriter, r *http.Request) {
 // Register handles the POST /register route and creates a new user with the provided credentials
 func (c *AuthController) Register(w http.ResponseWriter, r *http.Request) {
 	// Get the email and password from the request body
-	var registerRequest models.LoginRequest
+	var registerRequest models.LoginCredentials
 
 	if err := helpers.GetObjectFromJson(r, &registerRequest); err != nil {
 		helpers.SendError(w, r, utils.ErrorBadRequest(err))

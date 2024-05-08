@@ -1,5 +1,5 @@
 package model
 
-type SendResetPwdEmailRequest struct {
+type RequestResetPasswordLink struct {
 	Email string `json:"email"  validate:"required"`
 }

@@ -2,12 +2,19 @@ package model
 
 import "time"
 
-type Newsletter struct {
-	Id          uint64     `json:"id"`
-	Title       string     `json:"title"`
+type NewsletterAll struct {
+	Id          uint64     `json:"id" validate:"required"`
+	Title       string     `json:"title" validate:"required"`
 	Description string     `json:"description"`
-	Posts       []Post     `json:"posts"`
-	Subscribers []User     `json:"subscribers"`
-	CreatedAt   *time.Time `json:"created_at"`
-	Creator     uint64     `json:"creator"`
+	CreatedAt   *time.Time `json:"created_at" validate:"required"`
+	Creator     uint64     `json:"creator" validate:"required"`
+}
+
+type NewsletterUpdate struct {
+	Title       string `json:"title" validate:"required"`
+	Description string `json:"description"`
+}
+
+type NewsletterAllList struct {
+	Newsletters []NewsletterAll `json:"newsletters"`
 }

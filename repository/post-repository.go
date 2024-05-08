@@ -13,17 +13,17 @@ func NewPostRepository(db *db.Database) *PostRepository {
 	return &PostRepository{db: db}
 }
 
-func (repository *PostRepository) CreatePost(post *model.Post) (model.Post, error) {
+func (repository *PostRepository) CreatePost(post *model.PostAll) (model.PostAll, error) {
 	// TODO:
-	return model.Post{}, nil
+	return model.PostAll{}, nil
 }
 
-func (repository *PostRepository) DeleteAllPostsOfNewsletters(newsletterId uint64) ([]model.Post, error) {
+func (repository *PostRepository) DeleteAllPostsOfNewsletters(newsletterId uint64) ([]model.PostAll, error) {
 	// TODO:
-	return []model.Post{}, nil
+	return []model.PostAll{}, nil
 }
 
-func (repository *PostRepository) GetAllPostsOfNewsletters(newsletterId uint64) ([]model.Post, error) {
+func (repository *PostRepository) GetAllPostsOfNewsletters(newsletterId uint64) ([]model.PostAll, error) {
 	// TODO:
-	return []model.Post{}, nil
+	return []model.PostAll{}, nil
 }

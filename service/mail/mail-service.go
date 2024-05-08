@@ -8,9 +8,9 @@ type MailContent struct {
 }
 
 type MailService interface {
-	SendMailToListOfUsers(users []model.User, mailContent MailContent) error
+	SendMailToListOfEmails(emails []string, mailContent MailContent) error
 
-	SendMailLastNewsletterPost(newsletter model.Newsletter) error
+	SendMailNewsletterPost(newsletter model.NewsletterAll, post model.PostAll, subscribers model.SubscriberAllList) error
 
 	SendMailPasswordResetToken(user model.User, token string) error
 }

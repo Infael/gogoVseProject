@@ -3,5 +3,6 @@ CREATE TABLE IF NOT EXISTS newsletters (
     title VARCHAR(255) NOT NULL,
     description VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    CONSTRAINT fk_user FOREIGN KEY creator_id REFERENCES users(id) NOT NULL,
+    creator_id INT NOT NULL,
+    CONSTRAINT fk_user FOREIGN KEY creator_id REFERENCES users(id),
 );
