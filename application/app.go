@@ -27,15 +27,24 @@ type App struct {
 func New() *App {
 	app := &App{}
 
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-		panic(err)
+	if os.Getenv("PROD") == "" {
+		err := godotenv.Load()
+		if err != nil {
+			log.Fatal("Error loading .env file")
+			panic(err)
+		}
 	}
 
 	// init db
-	dbUser, dbPassword, dbName := os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASSWORD"), os.Getenv("POSTGRES_DB")
-	database, err := db.NewDatabase(dbUser, dbPassword, dbName)
+	database, err := db.NewDatabase(&db.InitDatabase{
+		Host:          os.Getenv("POSTGRES_HOST"),
+		Port:          os.Getenv("POSTGRES_PORT"),
+		Username:      os.Getenv("POSTGRES_USER"),
+		Password:      os.Getenv("POSTGRES_PASSWORD"),
+		Dbname:        os.Getenv("POSTGRES_DB"),
+		RunMigrations: os.Getenv("POSTGRES_RUN_MIGRATIONS"),
+	})
+
 	if err != nil {
 		log.Fatal("failed to connect to database: %v", err)
 		panic(err)
