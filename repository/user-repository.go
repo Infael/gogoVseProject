@@ -62,8 +62,8 @@ func (repository *UserRepository) UpdateUser(user *model.UserAll) (model.UserAll
 	return *user, nil
 }
 
+// all subscribers without any subscriptions will be removed
 func (repository *UserRepository) DeleteUser(id uint64) error {
-	// TODO: this will not only removes user -> add cascade but dont remove subscribers (if they have connectons)
 	query := "DELETE FROM users WHERE id = $1"
 	err := repository.db.Connection.QueryRow(query, id).Err()
 
@@ -72,6 +72,14 @@ func (repository *UserRepository) DeleteUser(id uint64) error {
 		return utils.ErrorNotFound(errors.New("user not found"))
 	}
 
+	if err != nil {
+		return utils.InternalServerError(err)
+	}
+
+	// delete all subscribers without any subscribtion from DB
+	_, err = repository.db.Connection.Exec(
+		"DELETE FROM subscribers WHERE id IN ( SELECT s.id FROM subscribers s LEFT JOIN newsletters_subscribers ns ON s.id = ns.subscriber_id WHERE ns.subscriber_id IS NULL );",
+	)
 	if err != nil {
 		return utils.InternalServerError(err)
 	}
@@ -91,7 +99,6 @@ func (repository *UserRepository) GetAllUsers() (model.UserList, error) {
 	}
 	defer rows.Close()
 
-	// TODO: utils
 	for rows.Next() {
 		user := model.User{}
 		err := rows.Scan(&user.Id, &user.Email)

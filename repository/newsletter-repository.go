@@ -11,8 +11,6 @@ import (
 )
 
 // TODO: errors !!
-// TODO: cascade deletions !!
-// TODO: add XXXlist making to utils
 type NewsletterRepository struct {
 	db *db.Database
 }
@@ -48,8 +46,8 @@ func (repository *NewsletterRepository) UpdateNewsletter(newsletter *model.Newsl
 	return *newsletter, nil
 }
 
+// all subscribers without any subscriptions will be removed
 func (repository *NewsletterRepository) DeleteNewsletter(id uint64) error {
-	// TODO: this will not only removes user -> add cascade but dont remove subscribers (if they have connectons)
 	query := "DELETE FROM newsletters WHERE id = $1"
 
 	err := repository.db.Connection.QueryRow(query, id).Err()
@@ -58,6 +56,14 @@ func (repository *NewsletterRepository) DeleteNewsletter(id uint64) error {
 		return utils.ErrorNotFound(errors.New("newsletter not found"))
 	}
 
+	if err != nil {
+		return utils.InternalServerError(err)
+	}
+
+	// delete all subscribers without any subscribtion from DB
+	_, err = repository.db.Connection.Exec(
+		"DELETE FROM subscribers WHERE id IN ( SELECT s.id FROM subscribers s LEFT JOIN newsletters_subscribers ns ON s.id = ns.subscriber_id WHERE ns.subscriber_id IS NULL );",
+	)
 	if err != nil {
 		return utils.InternalServerError(err)
 	}
@@ -92,7 +98,6 @@ func (repository *NewsletterRepository) GetAllNewsletters() ([]model.NewsletterA
 	defer rows.Close()
 	newsletters := []model.NewsletterAll{}
 
-	// TODO: utils ?
 	for rows.Next() {
 		var newsletter model.NewsletterAll
 		err := rows.Scan(&newsletter.Id, &newsletter.Title, &newsletter.Description, &newsletter.CreatedAt, &newsletter.Creator)

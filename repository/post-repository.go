@@ -1,13 +1,10 @@
 package repository
 
 import (
-	"database/sql"
-	"errors"
 	"time"
 
 	"github.com/Infael/gogoVseProject/db"
 	"github.com/Infael/gogoVseProject/model"
-	"github.com/Infael/gogoVseProject/utils"
 )
 
 type PostRepository struct {
@@ -27,22 +24,6 @@ func (repository *PostRepository) CreatePost(post *model.PostAll) (model.PostAll
 	}
 
 	return *post, nil
-}
-
-func (repository *PostRepository) DeleteAllPostsOfNewsletters(newsletterId uint64) error {
-	query := "DELETE FROM posts WHERE newsletter_id = $1"
-
-	_, err := repository.db.Connection.Exec(query, newsletterId)
-	// TODO: error when key is missing
-	if err != nil && err == sql.ErrNoRows {
-		return utils.ErrorNotFound(errors.New("posts not found"))
-	}
-
-	if err != nil {
-		return utils.InternalServerError(err)
-	}
-
-	return nil
 }
 
 func (repository *PostRepository) GetAllPostsOfNewsletters(newsletterId uint64) ([]model.PostAll, error) {

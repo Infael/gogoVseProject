@@ -46,6 +46,7 @@ func (repository *SubscriberRepository) SubscribeToNewsletter(newsletterId, subs
 }
 
 // TODO: error when key is missing
+// all subscribers without any subscriptions will be removed
 func (repository *SubscriberRepository) UnsubscribeFromNewsletter(newsletterId, subscriberId uint64) error {
 	// Delete association with newsletter
 	deleteAssocQuery := "DELETE FROM newsletters_subscribers WHERE newsletter_id = $1 AND subscriber_id = $2"
@@ -54,47 +55,11 @@ func (repository *SubscriberRepository) UnsubscribeFromNewsletter(newsletterId, 
 		return utils.InternalServerError(err)
 	}
 
-	// Check if the subscriber is associated with any other newsletters
-	var count int
-	err = repository.db.Connection.QueryRow("SELECT COUNT(*) FROM newsletters_subscribers WHERE subscriber_id = $1", subscriberId).Scan(&count)
+	// delete all subscribers without any subscribtion from DB
+	_, err = repository.db.Connection.Exec(
+		"DELETE FROM subscribers WHERE id IN ( SELECT s.id FROM subscribers s LEFT JOIN newsletters_subscribers ns ON s.id = ns.subscriber_id WHERE ns.subscriber_id IS NULL );",
+	)
 	if err != nil {
-		return utils.InternalServerError(err)
-	}
-
-	// If the subscriber is not associated with any other newsletters, delete the subscriber
-	if count == 0 {
-		deleteSubscriberQuery := "DELETE FROM subscribers WHERE id = $1"
-		_, err := repository.db.Connection.Exec(deleteSubscriberQuery, subscriberId)
-		if err != nil {
-			return utils.InternalServerError(err)
-		}
-	}
-
-	return nil
-}
-
-// TODO: error when key is missing
-func (repository *SubscriberRepository) UnsubscribeAllSubscribersOfNewsletter(newsletterId uint64) error {
-	// Select all subscribers of the newsletter
-	query := "SELECT subscriber_id FROM newsletters_subscribers WHERE newsletter_id = $1"
-	rows, err := repository.db.Connection.Query(query, newsletterId)
-	if err != nil {
-		return utils.InternalServerError(err)
-	}
-	defer rows.Close()
-
-	// Iterate through the subscribers and unsubscribe them from the newsletter
-	for rows.Next() {
-		var subscriberId uint64
-		if err := rows.Scan(&subscriberId); err != nil {
-			return utils.InternalServerError(err)
-		}
-		if err := repository.UnsubscribeFromNewsletter(newsletterId, subscriberId); err != nil {
-			return utils.InternalServerError(err)
-		}
-	}
-
-	if err = rows.Err(); err != nil {
 		return utils.InternalServerError(err)
 	}
 
