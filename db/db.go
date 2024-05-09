@@ -28,8 +28,8 @@ func NewDatabase(initDatabase *InitDatabase) (Database, error) {
 	db := Database{}
 
 	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s "+
-		"password=*** dbname=%s sslmode=disable",
-		initDatabase.Host, initDatabase.Port, initDatabase.Username, initDatabase.Dbname)
+		"password=%s dbname=%s sslmode=disable",
+		initDatabase.Host, initDatabase.Port, initDatabase.Username, initDatabase.Password, initDatabase.Dbname)
 	log.Println("connecting to database at", psqlInfo)
 
 	connection, err := sql.Open("postgres", psqlInfo)
