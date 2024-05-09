@@ -45,7 +45,7 @@ func (sms *StmpMailService) SendMailNewsletterPost(newsletter model.NewsletterAl
 		"www.dothisshitlater.com",
 	)
 
-	return sms.SendMailToListOfEmails(sms.getListOfEmailsFromSubsctibers(subscribers), MailContent{
+	return sms.SendMailToListOfEmails(sms.getListOfEmailsFromSubscribers(subscribers), MailContent{
 		Subject: newsletter.Title,
 		Html:    html,
 	})
@@ -65,7 +65,7 @@ func (sms *StmpMailService) SendMailPasswordResetToken(user model.User, token st
 	})
 }
 
-func (sms *StmpMailService) getListOfEmailsFromSubsctibers(listOfSubscribers model.SubscriberAllList) []string {
+func (sms *StmpMailService) getListOfEmailsFromSubscribers(listOfSubscribers model.SubscriberAllList) []string {
 	emails := []string{}
 	for _, subscriber := range listOfSubscribers.Subscribers {
 		emails = append(emails, subscriber.Email)
