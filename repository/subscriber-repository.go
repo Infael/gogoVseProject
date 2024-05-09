@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"errors"
 
 	"github.com/Infael/gogoVseProject/db"
 	"github.com/Infael/gogoVseProject/model"
@@ -18,12 +19,14 @@ func NewSubscriberRepository(db *db.Database) *SubscriberRepository {
 
 // tries find subscriber, if subscriber doesnt exist he will be created
 func (repository *SubscriberRepository) CreateOrFindSubscriber(subscriber *model.SubscriberAll) (model.SubscriberAll, error) {
+	// Find subscriber
 	findQuery := "SELECT id FROM subscribers WHERE email = $1"
 	err := repository.db.Connection.QueryRow(findQuery, subscriber.Email).Scan(&subscriber.Id)
-	if err != sql.ErrNoRows {
+	if err != sql.ErrNoRows && err != nil {
 		return *subscriber, utils.InternalServerError(err)
 	}
 
+	// Create subscriber
 	createQuery := "INSERT INTO subscribers (email) VALUES ($1) RETURNING id"
 	err = repository.db.Connection.QueryRow(createQuery, subscriber.Email).Scan(&subscriber.Id)
 	if err != nil {
@@ -33,11 +36,15 @@ func (repository *SubscriberRepository) CreateOrFindSubscriber(subscriber *model
 	return *subscriber, nil
 }
 
-// TODO: error when key is missing
 func (repository *SubscriberRepository) SubscribeToNewsletter(newsletterId, subscriberId uint64) error {
+	// Create association with newsletter
 	query := "INSERT INTO newsletters_subscribers (newsletter_id, subscriber_id) VALUES ($1, $2)"
 
-	_, err := repository.db.Connection.Exec(query, newsletterId, subscriberId)
+	err := repository.db.Connection.QueryRow(query, newsletterId, subscriberId).Err()
+	if err != nil && err == sql.ErrNoRows {
+		return utils.ErrorNotFound(errors.New("newsletter or subscriber not found"))
+	}
+
 	if err != nil {
 		return utils.InternalServerError(err)
 	}
@@ -45,17 +52,25 @@ func (repository *SubscriberRepository) SubscribeToNewsletter(newsletterId, subs
 	return nil
 }
 
-// TODO: error when key is missing
 // all subscribers without any subscriptions will be removed
 func (repository *SubscriberRepository) UnsubscribeFromNewsletter(newsletterId, subscriberId uint64) error {
 	// Delete association with newsletter
 	deleteAssocQuery := "DELETE FROM newsletters_subscribers WHERE newsletter_id = $1 AND subscriber_id = $2"
-	_, err := repository.db.Connection.Exec(deleteAssocQuery, newsletterId, subscriberId)
+	associationResult, err := repository.db.Connection.Exec(deleteAssocQuery, newsletterId, subscriberId)
 	if err != nil {
 		return utils.InternalServerError(err)
 	}
 
-	// delete all subscribers without any subscribtion from DB
+	associationResultAffectedRows, err := associationResult.RowsAffected()
+	if err != nil {
+		return utils.InternalServerError(err)
+	}
+
+	if associationResultAffectedRows == 0 {
+		return utils.ErrorNotFound(errors.New("newsletter or subscriber not found"))
+	}
+
+	// Delete all subscribers without any subscribtion from DB
 	_, err = repository.db.Connection.Exec(
 		"DELETE FROM subscribers WHERE id IN ( SELECT s.id FROM subscribers s LEFT JOIN newsletters_subscribers ns ON s.id = ns.subscriber_id WHERE ns.subscriber_id IS NULL );",
 	)
@@ -66,7 +81,6 @@ func (repository *SubscriberRepository) UnsubscribeFromNewsletter(newsletterId, 
 	return nil
 }
 
-// TODO: error when key is missing
 func (repository *SubscriberRepository) GetAllSubscribersOfNewsletters(newsletterId uint64) ([]model.SubscriberAll, error) {
 	// Select all subscribers by associations
 	query := "SELECT ns.newsletter_id, s.id, s.email FROM newsletters_subscribers ns JOIN subscribers s ON ns.subscriber_id = s.id"
@@ -77,8 +91,6 @@ func (repository *SubscriberRepository) GetAllSubscribersOfNewsletters(newslette
 	defer rows.Close()
 
 	subscribers := []model.SubscriberAll{}
-
-	// Create array of subscribers
 	for rows.Next() {
 		subscriber := model.SubscriberAll{}
 		var newsletterId uint64

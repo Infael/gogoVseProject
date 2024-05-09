@@ -59,7 +59,6 @@ func (sms *StmpMailService) SendMailPasswordResetToken(user model.User, token st
 		"http://localhost:3000/password/reset/"+token,
 	)
 
-	// TODO:
 	return sms.SendMailToListOfEmails([]string{user.Email}, MailContent{
 		Subject: "Password Reset Request",
 		Html:    html,
