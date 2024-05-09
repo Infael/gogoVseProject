@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"database/sql"
+	"errors"
 	"time"
 
 	"github.com/Infael/gogoVseProject/db"
@@ -8,6 +10,9 @@ import (
 	"github.com/Infael/gogoVseProject/utils"
 )
 
+// TODO: errors !!
+// TODO: cascade deletions !!
+// TODO: add XXXlist making to utils
 type NewsletterRepository struct {
 	db *db.Database
 }
@@ -30,8 +35,12 @@ func (repository *NewsletterRepository) CreateNewsletter(newsletter *model.Newsl
 func (repository *NewsletterRepository) UpdateNewsletter(newsletter *model.NewsletterAll) (model.NewsletterAll, error) {
 	query := "UPDATE newsletters SET title = $1, description = $2 WHERE id = $3"
 
-	// TODO: not found (in all cases CRUD) !!!
 	err := repository.db.Connection.QueryRow(query, newsletter.Title, newsletter.Description, newsletter.Id).Err()
+
+	if err != nil && err == sql.ErrNoRows {
+		return *newsletter, utils.ErrorNotFound(errors.New("newsletter not found"))
+	}
+
 	if err != nil {
 		return *newsletter, utils.InternalServerError(err)
 	}
@@ -44,8 +53,12 @@ func (repository *NewsletterRepository) DeleteNewsletter(id uint64) error {
 	query := "DELETE FROM newsletters WHERE id = $1"
 
 	err := repository.db.Connection.QueryRow(query, id).Err()
+	// TODO: error when key is missing
+	if err != nil && err == sql.ErrNoRows {
+		return utils.ErrorNotFound(errors.New("newsletter not found"))
+	}
+
 	if err != nil {
-		// TODO: not found (in all cases CRUD) !!! in all cases !!!
 		return utils.InternalServerError(err)
 	}
 
@@ -57,9 +70,13 @@ func (repository *NewsletterRepository) GetNewsletter(id uint64) (model.Newslett
 
 	newsletter := model.NewsletterAll{}
 	err := repository.db.Connection.QueryRow(query, id).Scan(&newsletter.Id, &newsletter.Title, &newsletter.Description, &newsletter.CreatedAt, &newsletter.Creator)
+
+	if err != nil && err == sql.ErrNoRows {
+		return newsletter, utils.ErrorNotFound(errors.New("newsletter not found"))
+	}
+
 	if err != nil {
-		// TODO: not found (in all cases CRUD) !!! in all cases !!!
-		return newsletter, err
+		return newsletter, utils.InternalServerError(err)
 	}
 
 	return newsletter, nil
@@ -75,6 +92,7 @@ func (repository *NewsletterRepository) GetAllNewsletters() ([]model.NewsletterA
 	defer rows.Close()
 	newsletters := []model.NewsletterAll{}
 
+	// TODO: utils ?
 	for rows.Next() {
 		var newsletter model.NewsletterAll
 		err := rows.Scan(&newsletter.Id, &newsletter.Title, &newsletter.Description, &newsletter.CreatedAt, &newsletter.Creator)
