@@ -1,5 +1,5 @@
 package model
 
-type ResetPwdRequest struct {
+type ResetPasswordAttempt struct {
 	NewPassword string `json:"new_password"  validate:"required"`
 }

@@ -31,7 +31,7 @@ func NewPasswordService(mailService mail.MailService, cache *cache.Cache, userRe
 }
 
 func (ps *PasswordService) SendPasswordResetToken(email string) error {
-	user, err := ps.userRepository.GetUserByEmail(email)
+	userAll, err := ps.userRepository.GetUserByEmail(email)
 	if err != nil {
 		return err
 	}
@@ -45,10 +45,13 @@ func (ps *PasswordService) SendPasswordResetToken(email string) error {
 		return utils.InternalServerError(err)
 	}
 
-	ps.cache.Set(resetToken, user.Email, cache.DefaultExpiration)
+	ps.cache.Set(resetToken, userAll.Email, cache.DefaultExpiration)
 
 	// send resetToken to user
-	err = ps.mailService.SendMailPasswordResetToken(user, resetToken)
+	err = ps.mailService.SendMailPasswordResetToken(model.User{
+		Email: userAll.Email,
+		Id:    userAll.Id,
+	}, resetToken)
 	if err != nil {
 		return err
 	}
@@ -60,7 +63,7 @@ func (ps *PasswordService) ResetPasswordWithToken(newPassword, token string) err
 	// check if token exists
 	result, found := ps.cache.Get(token)
 	if !found {
-		return utils.ErrorNotFound(errors.New("Not Found SSS"))
+		return utils.ErrorNotFound(errors.New("Not Found"))
 	}
 
 	// remove token
@@ -77,7 +80,7 @@ func (ps *PasswordService) ResetPasswordWithToken(newPassword, token string) err
 	if err != nil {
 		return err
 	}
-	_, err = ps.userRepository.UpdateUser(&model.User{
+	_, err = ps.userRepository.UpdateUser(&model.UserAll{
 		Email:        user.Email,
 		PasswordHash: string(hashedPassword),
 		Id:           user.Id,

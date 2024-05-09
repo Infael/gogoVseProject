@@ -1,5 +1,5 @@
 package model
 
-type LoginResponse struct {
+type JwtToken struct {
 	Token string `json:"token"`
 }
