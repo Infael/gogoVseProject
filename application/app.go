@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/Infael/gogoVseProject/db"
@@ -13,6 +14,7 @@ import (
 	"github.com/Infael/gogoVseProject/service"
 	"github.com/joho/godotenv"
 	"github.com/patrickmn/go-cache"
+	"gopkg.in/gomail.v2"
 )
 
 type App struct {
@@ -53,18 +55,18 @@ func New() *App {
 	cache := cache.New(15*time.Minute, 20*time.Minute)
 
 	// init mail dailer
-	// provider := os.Getenv("STMP_PROVIDER")
-	// port, err := strconv.Atoi(os.Getenv("STMP_PORT"))
-	// if err != nil {
-	// 	log.Fatal("failed to stmp server: %v", err)
-	// 	panic(err)
-	// }
-	// user := os.Getenv("STMP_MAIL")
-	// pwd := os.Getenv("STMP_PWD")
-	// mailDialer := gomail.NewDialer(provider, port, user, pwd)
+	provider := os.Getenv("STMP_PROVIDER")
+	port, err := strconv.Atoi(os.Getenv("STMP_PORT"))
+	if err != nil {
+		log.Fatal("failed to stmp server: %v", err)
+		panic(err)
+	}
+	user := os.Getenv("STMP_MAIL")
+	pwd := os.Getenv("STMP_PWD")
+	mailDialer := gomail.NewDialer(provider, port, user, pwd)
 
 	app.repositories = repository.NewRepositories(app.db)
-	app.services = service.NewServices(app.repositories, cache, nil) // TODO MS: uncomment code above and add mailDialer here
+	app.services = service.NewServices(app.repositories, cache, mailDialer)
 	app.loadRoutes()
 
 	return app

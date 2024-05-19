@@ -373,52 +373,7 @@ paths:
           description: Not found
         "500":
           description: Internal server error
-  /users:
-    get:
-      tags:
-        - users
-      security:
-        - bearerAuth: []
-      description: Get all users
-      responses:
-        "200":
-          description: List of all users
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/UserList"
-        "401":
-          description: Unauthorized
-        "500":
-          description: Internal server error
   /users/{id}:
-    get:
-      tags:
-        - users
-      security:
-        - bearerAuth: []
-      description: Get editor by ID
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: User with given id
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/User"
-        "400":
-          description: Bad request
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not found
-        "500":
-          description: Internal server error
     put:
       tags:
         - users
@@ -452,7 +407,7 @@ paths:
         - users
       security:
         - bearerAuth: []
-      description: Delete editor by ID this can be performed only on currently logged in user
+      description: Schedule delete editor by ID - this can be performed only on currently logged in user, user will be deleted after some interval, this can be canceled by user
       parameters:
         - in: path
           name: id
@@ -462,6 +417,30 @@ paths:
       responses:
         "204":
           description: No content
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+        "500":
+          description: Internal server error
+  /user/{id}/cancel-delete:
+    post:
+      tags:
+        - users
+      security:
+        - bearerAuth: []
+      description: Cancel delete editor by ID - this can be performed only on currently logged in user
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Success
         "400":
           description: Bad request
         "401":
