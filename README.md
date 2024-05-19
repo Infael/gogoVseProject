@@ -30,8 +30,6 @@ Please follow rules in [CONTRIBUTING.md](./CONTRIBUTING.md)
 
 ## Create db locally
 
-I'm doing something soooo wrong... it can't be that complicated.
-
 - install postgres
 
 ```bash
@@ -66,3 +64,4 @@ CREATE DATABASE godb WITH OWNER postgres_user ENCODING='UTF8';
 ```bash
   PROD=true go run main.go
 ```
+

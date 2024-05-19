@@ -4,7 +4,15 @@ info:
   version: 1.0.0
 servers:
   - url: http://localhost:8080
-
+tags:
+  - name: auth
+    description: Authentication endpoints
+  - name: password
+    description: Password management endpoints
+  - name: newsletters
+    description: Newsletter endpoints
+  - name: users
+    description: User endpoints
 paths:
   /:
     get:
@@ -14,6 +22,8 @@ paths:
           description: No Content
   /auth/register:
     post:
+      tags:
+        - auth
       description: Register a new user
       requestBody:
         required: true
@@ -30,6 +40,8 @@ paths:
           description: Internal server error
   /auth/login:
     post:
+      tags:
+        - auth
       description: Log in a user
       requestBody:
         required: true
@@ -52,6 +64,8 @@ paths:
           description: Internal server error
   /password/request-reset:
     post:
+      tags:
+        - password
       description: Request to get reset password link, link is valid 15 minutes
       requestBody:
         required: true
@@ -68,6 +82,8 @@ paths:
           description: Internal server error
   /password/reset/{token}:
     post:
+      tags:
+        - password
       description: Sets new password with reset token
       parameters:
         - in: path
@@ -92,6 +108,8 @@ paths:
           description: Internal server error
   /newsletters:
     post:
+      tags:
+        - newsletters
       security:
         - bearerAuth: []
       description: Create a newsletter. Created newsletter will belong to signed user.
@@ -110,6 +128,8 @@ paths:
         "500":
           description: Internal server error
     get:
+      tags:
+        - newsletters
       description: Get all newsletters.
       responses:
         "200":
@@ -122,6 +142,8 @@ paths:
           description: Internal server error
   /newsletters/{id}:
     get:
+      tags:
+        - newsletters
       description: Get newsletter by ID
       parameters:
         - in: path
@@ -143,6 +165,8 @@ paths:
         "500":
           description: Internal server error
     put:
+      tags:
+        - newsletters
       security:
         - bearerAuth: []
       description: Update newsletter by ID. Can be performed only as a signed in user, who is also the owner of the newsletter.
@@ -173,6 +197,8 @@ paths:
         "500":
           description: Internal server error
     delete:
+      tags:
+        - newsletters
       security:
         - bearerAuth: []
       description: Delete newsletter by ID. Can be performed only as a signed in user, who is also the owner of the newsletter.
@@ -195,6 +221,8 @@ paths:
           description: Internal server error
   /newsletters/{id}/posts:
     post:
+      tags:
+        - newsletters
       security:
         - bearerAuth: []
       description: Create a post for a newsletter. Can be performed only as a signed in user, who is also the owner of the newsletter.
@@ -221,6 +249,8 @@ paths:
         "500":
           description: Internal server error
     get:
+      tags:
+        - newsletters
       description: Get all posts of a newsletter.
       parameters:
         - in: path
@@ -243,6 +273,8 @@ paths:
           description: Internal server error
   /newsletters/{id}/subscribers:
     post:
+      tags:
+        - newsletters
       description: Request subscription. Sends verification link to given email. Link is valid for 30 minutes.
       parameters:
         - in: path
@@ -265,6 +297,8 @@ paths:
         "500":
           description: Internal server error
     get:
+      tags:
+        - newsletters
       security:
         - bearerAuth: []
       description: Get all subscribers of a newsletter. Can be performed only as a signed in user, who is also the owner of the newsletter.
@@ -291,6 +325,8 @@ paths:
           description: Internal server error
   /newsletters/{id}/subscribers/verify/{token}:
     post:
+      tags:
+        - newsletters
       description: Confirms subscription.
       parameters:
         - in: path
@@ -314,6 +350,8 @@ paths:
           description: Internal server error
   /newsletters/{newsId}/subscribers/{subId}:
     delete:
+      tags:
+        - newsletters
       description: Unsubscribes subscriber.
       parameters:
         - in: path
@@ -337,6 +375,8 @@ paths:
           description: Internal server error
   /users:
     get:
+      tags:
+        - users
       security:
         - bearerAuth: []
       description: Get all users
@@ -353,6 +393,8 @@ paths:
           description: Internal server error
   /users/{id}:
     get:
+      tags:
+        - users
       security:
         - bearerAuth: []
       description: Get editor by ID
@@ -378,6 +420,8 @@ paths:
         "500":
           description: Internal server error
     put:
+      tags:
+        - users
       security:
         - bearerAuth: []
       description: Update editor by ID this can be performed only on currently logged in user
@@ -404,6 +448,8 @@ paths:
         "500":
           description: Internal server error
     delete:
+      tags:
+        - users
       security:
         - bearerAuth: []
       description: Delete editor by ID this can be performed only on currently logged in user
@@ -634,3 +680,4 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+
