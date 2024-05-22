@@ -58,10 +58,6 @@ func (c *AuthController) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	_, err := mail.ParseAddress(registerRequest.Email)
-	if err := helpers.GetObjectFromJson(r, &registerRequest); err != nil {
-		helpers.SendError(w, r, utils.ErrorBadRequest(err))
-		return
-	}
 
 	// Register the new user and get a custom token for the user
 	err = c.authService.Register(registerRequest.Email, registerRequest.Password)

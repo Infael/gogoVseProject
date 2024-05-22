@@ -36,6 +36,10 @@ func ErrorUnauthorized(err error) StatusError {
 	return NewError(err, http.StatusUnauthorized)
 }
 
+func ErrorForbidden(err error) StatusError {
+	return NewError(err, http.StatusForbidden)
+}
+
 func ErrorNotFound(err error) StatusError {
 	return NewError(err, http.StatusNotFound)
 }

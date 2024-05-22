@@ -33,7 +33,6 @@ func (pc *PasswordController) SendResetPasswordEmail(w http.ResponseWriter, r *h
 	}
 
 	helpers.SendResponse(w, nil, http.StatusNoContent)
-	return
 }
 
 func (pc *PasswordController) SetNewPasswordWithResetToken(w http.ResponseWriter, r *http.Request) {
@@ -51,5 +50,4 @@ func (pc *PasswordController) SetNewPasswordWithResetToken(w http.ResponseWriter
 	}
 
 	helpers.SendResponse(w, nil, http.StatusNoContent)
-	return
 }
