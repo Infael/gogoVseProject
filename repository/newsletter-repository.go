@@ -3,7 +3,6 @@ package repository
 import (
 	"database/sql"
 	"errors"
-	"time"
 
 	"github.com/Infael/gogoVseProject/db"
 	"github.com/Infael/gogoVseProject/model"
@@ -18,16 +17,22 @@ func NewNewsletterRepository(db *db.Database) *NewsletterRepository {
 	return &NewsletterRepository{db: db}
 }
 
-func (repository *NewsletterRepository) CreateNewsletter(newsletter *model.NewsletterAll) (model.NewsletterAll, error) {
+func (repository *NewsletterRepository) CreateNewsletter(newsletter model.NewsletterCreate) (model.NewsletterAll, error) {
 	// Create newsletter
-	query := "INSERT INTO newsletters (title, description, created_at, creator_id) VALUES ($1, $2, $3, $4) RETURNING id"
+	query := "INSERT INTO newsletters (title, description, creator_id) VALUES ($1, $2, $3) RETURNING id, created_at"
 
-	err := repository.db.Connection.QueryRow(query, newsletter.Title, newsletter.Description, time.Now(), newsletter.Creator).Scan(&newsletter.Id)
-	if err != nil {
-		return *newsletter, utils.InternalServerError(err)
+	newNewsletter := model.NewsletterAll{
+		Title:       newsletter.Title,
+		Description: newsletter.Description,
+		Creator:     newsletter.Creator,
 	}
 
-	return *newsletter, nil
+	err := repository.db.Connection.QueryRow(query, newsletter.Title, newsletter.Description, newsletter.Creator).Scan(&newNewsletter.Id, &newNewsletter.CreatedAt)
+	if err != nil {
+		return newNewsletter, utils.InternalServerError(err)
+	}
+
+	return newNewsletter, nil
 }
 
 func (repository *NewsletterRepository) UpdateNewsletter(newsletter *model.NewsletterAll) (model.NewsletterAll, error) {

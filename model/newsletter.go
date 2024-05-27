@@ -10,6 +10,12 @@ type NewsletterAll struct {
 	Creator     uint64     `json:"creator" validate:"required"`
 }
 
+type NewsletterCreate struct {
+	Title       string `json:"title" validate:"required"`
+	Description string `json:"description"`
+	Creator     uint64 `json:"creator"`
+}
+
 type NewsletterUpdate struct {
 	Title       string `json:"title" validate:"required"`
 	Description string `json:"description"`

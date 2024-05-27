@@ -57,7 +57,14 @@ func NewDatabase(initDatabase *InitDatabase) (Database, error) {
 			return db, err
 		}
 
-		m.Up()
+		migrationError := m.Up()
+		if migrationError != nil && migrationError != migrate.ErrNoChange {
+			log.Println("migrations error")
+			log.Println(migrationError)
+		}
+		if migrationError == migrate.ErrNoChange {
+			log.Println("migrations no change")
+		}
 		log.Println("migrations completed")
 	}
 

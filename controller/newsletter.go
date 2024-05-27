@@ -1,36 +1,162 @@
 package controller
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
+
+	"github.com/Infael/gogoVseProject/controller/helpers"
+	"github.com/Infael/gogoVseProject/model"
+	"github.com/Infael/gogoVseProject/service/newsletter"
+	"github.com/Infael/gogoVseProject/service/user"
+	"github.com/Infael/gogoVseProject/utils"
 )
 
-type Newsletter struct{}
-
-func (n *Newsletter) Create(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Creating newsletter...")
+type NewsletterController struct {
+	newsletterService *newsletter.NewsletterService
+	userService       *user.UserService
 }
 
-func (n *Newsletter) List(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Listing newsletters...")
+func NewNewsletterController(newsletterService *newsletter.NewsletterService, userService *user.UserService) *NewsletterController {
+	return &NewsletterController{
+		newsletterService: newsletterService,
+		userService:       userService,
+	}
 }
 
-func (n *Newsletter) GetById(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Getting newsletter by id...")
+func (n *NewsletterController) getLoggedUser(r *http.Request) (*model.UserAll, error) {
+	userMail := r.Context().Value("email")
+	if userMail == nil {
+		return nil, utils.ErrorBadRequest(errors.New("user not found in context"))
+	}
+	user, err := n.userService.GetUserByEmail(userMail.(string))
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
 }
 
-func (n *Newsletter) UpdateById(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Updating newsletter by id...")
+func (n *NewsletterController) Create(w http.ResponseWriter, r *http.Request) {
+	var newNewsletter model.NewsletterCreate
+
+	if err := helpers.GetObjectFromJson(r, &newNewsletter); err != nil {
+		helpers.SendError(w, r, err)
+		return
+	}
+
+	user, err := n.getLoggedUser(r)
+	if err != nil {
+		helpers.SendError(w, r, err)
+		return
+	}
+	newNewsletter.Creator = user.Id
+
+	if createdNewsletter, err := n.newsletterService.CreateNewsletter(newNewsletter); err != nil {
+		helpers.SendError(w, r, err)
+		return
+	} else {
+		helpers.SendResponseStatusOk(w, createdNewsletter)
+	}
 }
 
-func (n *Newsletter) DeleteById(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Deleting newsletter by id...")
+func (n *NewsletterController) List(w http.ResponseWriter, r *http.Request) {
+	if newsletters, err := n.newsletterService.GetAllNewsletters(); err != nil {
+		helpers.SendError(w, r, err)
+		return
+	} else {
+		helpers.SendResponseStatusOk(w, newsletters)
+	}
 }
 
-func (n *Newsletter) CreatePost(w http.ResponseWriter, r *http.Request) {
+func (n *NewsletterController) GetById(w http.ResponseWriter, r *http.Request) {
+	if id, err := helpers.GetIdFromRequest(r); err != nil {
+		helpers.SendError(w, r, err)
+		return
+	} else {
+		if newsletter, err := n.newsletterService.GetNewsletterById(*id); err != nil {
+			helpers.SendError(w, r, err)
+			return
+		} else {
+			helpers.SendResponseStatusOk(w, newsletter)
+		}
+	}
+
+}
+
+func (n *NewsletterController) UpdateById(w http.ResponseWriter, r *http.Request) {
+	if id, err := helpers.GetIdFromRequest(r); err != nil {
+		helpers.SendError(w, r, err)
+		return
+	} else {
+		var updatedNewsletter model.NewsletterUpdate
+
+		if err := helpers.GetObjectFromJson(r, &updatedNewsletter); err != nil {
+			helpers.SendError(w, r, err)
+			return
+		}
+
+		// Check if the user is allowed to update the newsletter
+		user, err := n.getLoggedUser(r)
+		if err != nil {
+			helpers.SendError(w, r, err)
+			return
+		}
+		newsletter, err := n.newsletterService.GetNewsletterById(*id)
+		if err != nil {
+			helpers.SendError(w, r, err)
+			return
+		}
+		if newsletter.Creator != user.Id {
+			helpers.SendError(w, r, utils.ErrorForbidden(errors.New("user is not allowed to update this newsletter")))
+			return
+		}
+
+		// Update the newsletter
+		if updatedNewsletter, err := n.newsletterService.UpdateNewsletter(*id, &updatedNewsletter); err != nil {
+			helpers.SendError(w, r, err)
+			return
+		} else {
+			helpers.SendResponseStatusOk(w, updatedNewsletter)
+		}
+	}
+}
+
+func (n *NewsletterController) DeleteById(w http.ResponseWriter, r *http.Request) {
+	if id, err := helpers.GetIdFromRequest(r); err != nil {
+		helpers.SendError(w, r, err)
+		return
+	} else {
+
+		// Check if the user is allowed to delete the newsletter
+		user, err := n.getLoggedUser(r)
+		if err != nil {
+			helpers.SendError(w, r, err)
+			return
+		}
+		newsletter, err := n.newsletterService.GetNewsletterById(*id)
+		if err != nil {
+			helpers.SendError(w, r, err)
+			return
+		}
+		if newsletter.Creator != user.Id {
+			helpers.SendError(w, r, utils.ErrorForbidden(errors.New("user is not allowed to update this newsletter")))
+			return
+		}
+
+		// Delete the newsletter
+		if err := n.newsletterService.DeleteNewsletter(*id); err != nil {
+			helpers.SendError(w, r, err)
+			return
+		} else {
+			helpers.SendResponse(w, nil, http.StatusNoContent)
+		}
+	}
+}
+
+func (n *NewsletterController) CreatePost(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Creating new post for newsletter with id...")
 }
 
-func (n *Newsletter) GetPosts(w http.ResponseWriter, r *http.Request) {
+func (n *NewsletterController) GetPosts(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Getting posts for newsletter with id...")
 }

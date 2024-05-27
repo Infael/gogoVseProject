@@ -35,7 +35,7 @@ func (app *App) loadRoutes() {
 }
 
 func (app *App) loadNewslettersRoutes(router chi.Router) {
-	newsletterController := &controller.Newsletter{}
+	newsletterController := controller.NewNewsletterController(&app.services.NewsletterService, &app.services.UserService)
 
 	router.Post("/", newsletterController.Create)
 	router.Get("/", newsletterController.List)
@@ -50,11 +50,10 @@ func (app *App) loadNewslettersRoutes(router chi.Router) {
 func (app *App) loadUserRoutes(router chi.Router) {
 	userController := controller.NewUserController(&app.services.UserService)
 
-	// TODO: We are not using id from this routes, we are using the email from the context from JWT. Should we delete the id from the routes?
-	router.Put("/{id}", userController.UpdateAccount)
+	router.Put("/", userController.UpdateAccount)
 	// I wanted to try asynchronous operations in Go, so I added a 60-second delay to the deletion of the user.
-	router.Delete("/{id}", userController.DeleteAccount)
-	router.Post("/{id}/cancel-delete", userController.CancelUserDeletion)
+	router.Delete("/", userController.DeleteAccount)
+	router.Post("/cancel-delete", userController.CancelUserDeletion)
 }
 
 func (app *App) loadAuthRoutes(router chi.Router) {

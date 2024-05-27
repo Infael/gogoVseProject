@@ -373,7 +373,7 @@ paths:
           description: Not found
         "500":
           description: Internal server error
-  /users/{id}:
+  /users:
     put:
       tags:
         - users
@@ -425,7 +425,7 @@ paths:
           description: Not found
         "500":
           description: Internal server error
-  /user/{id}/cancel-delete:
+  /user/cancel-delete:
     post:
       tags:
         - users
