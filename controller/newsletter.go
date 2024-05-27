@@ -8,19 +8,22 @@ import (
 	"github.com/Infael/gogoVseProject/controller/helpers"
 	"github.com/Infael/gogoVseProject/model"
 	"github.com/Infael/gogoVseProject/service/newsletter"
+	"github.com/Infael/gogoVseProject/service/post"
 	"github.com/Infael/gogoVseProject/service/user"
 	"github.com/Infael/gogoVseProject/utils"
 )
 
 type NewsletterController struct {
 	newsletterService *newsletter.NewsletterService
+	postService       *post.PostService
 	userService       *user.UserService
 }
 
-func NewNewsletterController(newsletterService *newsletter.NewsletterService, userService *user.UserService) *NewsletterController {
+func NewNewsletterController(newsletterService *newsletter.NewsletterService, postService *post.PostService, userService *user.UserService) *NewsletterController {
 	return &NewsletterController{
 		newsletterService: newsletterService,
 		userService:       userService,
+		postService:       postService,
 	}
 }
 
@@ -154,7 +157,49 @@ func (n *NewsletterController) DeleteById(w http.ResponseWriter, r *http.Request
 }
 
 func (n *NewsletterController) CreatePost(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Creating new post for newsletter with id...")
+	var newPostUpdate model.PostUpdate
+
+	if err := helpers.GetObjectFromJson(r, &newPostUpdate); err != nil {
+		helpers.SendError(w, r, err)
+		return
+	}
+
+	id, err := helpers.GetIdFromRequest(r)
+	if err != nil {
+		helpers.SendError(w, r, err)
+		return
+	}
+
+	newsletter, err := n.newsletterService.GetNewsletterById(*id)
+	if err != nil {
+		helpers.SendError(w, r, err)
+		return
+	}
+
+	user, err := n.getLoggedUser(r)
+	if err != nil {
+		helpers.SendError(w, r, err)
+		return
+	}
+
+	// Check if user is allowed to post to this newsletter
+	if newsletter.Creator != user.Id {
+		helpers.SendError(w, r, utils.ErrorForbidden(errors.New("user is not allowed to post to this newsletter")))
+		return
+	}
+
+	newPost := model.PostAll{
+		Title:        newPostUpdate.Title,
+		Body:         newPostUpdate.Body,
+		NewsletterId: *id,
+	}
+
+	if createdPost, err := n.postService.CreatePost(newPost); err != nil {
+		helpers.SendError(w, r, err)
+		return
+	} else {
+		helpers.SendResponseStatusOk(w, createdPost)
+	}
 }
 
 func (n *NewsletterController) GetPosts(w http.ResponseWriter, r *http.Request) {

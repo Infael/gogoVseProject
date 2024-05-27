@@ -6,6 +6,7 @@ import (
 	"github.com/Infael/gogoVseProject/service/mail"
 	"github.com/Infael/gogoVseProject/service/newsletter"
 	"github.com/Infael/gogoVseProject/service/password"
+	"github.com/Infael/gogoVseProject/service/post"
 	"github.com/Infael/gogoVseProject/service/user"
 	"github.com/patrickmn/go-cache"
 	"gopkg.in/gomail.v2"
@@ -17,6 +18,7 @@ type Services struct {
 	MailService       mail.MailService
 	UserService       user.UserService
 	NewsletterService newsletter.NewsletterService
+	PostService       post.PostService
 }
 
 func NewServices(repositories *repository.Repositories, cache *cache.Cache, dialer *gomail.Dialer) *Services {
@@ -31,5 +33,6 @@ func NewServices(repositories *repository.Repositories, cache *cache.Cache, dial
 		),
 		UserService:       *user.NewUserService(repositories.UserRepository),
 		NewsletterService: *newsletter.NewNewsletterService(repositories.NewsletterRepository),
+		PostService:       *post.NewPostService(mailService, repositories.PostRepository),
 	}
 }

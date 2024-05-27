@@ -35,7 +35,7 @@ func (app *App) loadRoutes() {
 }
 
 func (app *App) loadNewslettersRoutes(router chi.Router) {
-	newsletterController := controller.NewNewsletterController(&app.services.NewsletterService, &app.services.UserService)
+	newsletterController := controller.NewNewsletterController(&app.services.NewsletterService, &app.services.PostService, &app.services.UserService)
 
 	router.Post("/", newsletterController.Create)
 	router.Get("/", newsletterController.List)

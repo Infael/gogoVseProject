@@ -46,7 +46,7 @@ func (sms *StmpMailService) SendMailNewsletterPost(newsletter model.NewsletterAl
 	)
 
 	return sms.SendMailToListOfEmails(sms.getListOfEmailsFromSubscribers(subscribers), MailContent{
-		Subject: newsletter.Title,
+		Subject: post.Title + " - " + newsletter.Title,
 		Html:    html,
 	})
 }
