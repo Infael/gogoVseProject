@@ -3,7 +3,7 @@ info:
   title: GoNewsletter
   version: 1.0.0
 servers:
-  - url: http://localhost:8080
+  - url: http://localhost:3000
 tags:
   - name: auth
     description: Authentication endpoints
@@ -292,8 +292,6 @@ paths:
           description: Verification email send.
         "400":
           description: Bad request
-        "404":
-          description: Not found
         "500":
           description: Internal server error
     get:
@@ -324,6 +322,30 @@ paths:
         "500":
           description: Internal server error
   /newsletters/{id}/subscribers/verify/{token}:
+    get:
+      tags:
+        - newsletters
+      description: Confirms subscription in browser.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: token
+          required: true
+          schema:
+            type: string
+      responses:
+        "302":
+          description: Redirect to confirmation page
+        "400":
+          description: Bad request
+        "404":
+          description: Not found
+        "500":
+          description: Internal server error
     post:
       tags:
         - newsletters
@@ -348,7 +370,31 @@ paths:
           description: Not found
         "500":
           description: Internal server error
-  /newsletters/{newsId}/subscribers/{subId}:
+  /newsletters/{newsId}/subscribers/unsubscribe/{subId}:
+    get:
+      tags:
+        - newsletters
+      description: Unsubscribes subscriber.
+      parameters:
+        - in: path
+          name: newsId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: subId
+          required: true
+          schema:
+            type: string
+      responses:
+        "302":
+          description: Redirect to confirmation page
+        "400":
+          description: Bad request
+        "404":
+          description: Not found
+        "500":
+          description: Internal server error
     delete:
       tags:
         - newsletters

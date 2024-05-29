@@ -6,6 +6,7 @@ type Repositories struct {
 	UserRepository       *UserRepository
 	NewsletterRepository *NewsletterRepository
 	PostRepository       *PostRepository
+	SubscriberRepository *SubscriberRepository
 }
 
 func NewRepositories(db *db.Database) *Repositories {
@@ -13,5 +14,6 @@ func NewRepositories(db *db.Database) *Repositories {
 		UserRepository:       NewUserRepository(db),
 		NewsletterRepository: NewNewsletterRepository(db),
 		PostRepository:       NewPostRepository(db),
+		SubscriberRepository: NewSubscriberRepository(db),
 	}
 }

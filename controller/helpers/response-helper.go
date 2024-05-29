@@ -18,6 +18,11 @@ func SendResponse(w http.ResponseWriter, object interface{}, statusCode int) err
 	return nil
 }
 
+func Redirect(w http.ResponseWriter, r *http.Request, url string) error {
+	http.Redirect(w, r, url, http.StatusSeeOther)
+	return nil
+}
+
 func SendResponseStatusOk(w http.ResponseWriter, object interface{}) error {
 	return SendResponse(w, object, 200)
 }
