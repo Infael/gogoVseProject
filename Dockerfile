@@ -49,6 +49,8 @@ COPY --from=build-production /etc/passwd /etc/passwd
 
 # We transport the binary to our deployable image
 COPY --from=build-production /app/web-app-golang web-app-golang
+COPY --from=build-production /app/templates templates
+COPY --from=build-production /app/static static
 
 # Use non-root user
 USER crocoder
