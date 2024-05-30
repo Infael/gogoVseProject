@@ -1,0 +1,29 @@
+register
+curl -X POST --header "Content-Type: application/json" --data '{"email":"xyz@xyz.com","password":"xyz"}' localhost:3000/auth/register
+
+login
+curl -X POST --header "Content-Type: application/json" --data '{"email":"xyz@xyz.com","password":"xyz"}' localhost:3000/auth/login
+
+create newsletter
+curl -X POST -H "Content-Type: application/json" -H "Authorization: OAuth eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Inh5ekB4eXouY29tIiwiZXhwIjoxNzE2NDQ2Njc0fQ.-1EC9TcABf07Mh4iVCJlIbSi7awfmqBeJCHMo4XZZ80"  --data '{"title": "firstNewsletter", "description": "first attempt to create a newsletter"}' localhost:3000/newsletters
+
+get all newsletters
+curl -X GET -H "Authorization: OAuth eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Inh5ekB4eXouY29tIiwiZXhwIjoxNzE2NDQ2Njc0fQ.-1EC9TcABf07Mh4iVCJlIbSi7awfmqBeJCHMo4XZZ80" localhost:3000/newsletters
+
+get newsletter by id
+curl -X GET -H "Authorization: OAuth eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Inh5ekB4eXouY29tIiwiZXhwIjoxNzE2NDQ2Njc0fQ.-1EC9TcABf07Mh4iVCJlIbSi7awfmqBeJCHMo4XZZ80" localhost:3000/newsletters/1
+
+update newsletter
+curl -X PUT -H "Content-Type: application/json" -H "Authorization: OAuth eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Inh5ekB4eXouY29tIiwiZXhwIjoxNzE2NDQ2Njc0fQ.-1EC9TcABf07Mh4iVCJlIbSi7awfmqBeJCHMo4XZZ80"  --data '{"title":"secondNewsletter-update","description":"first attempt to update a second newsletter"}}' localhost:3000/newsletters/4
+
+delete newsletter
+curl -X DELETE -H "Authorization: OAuth eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Inh5ekB4eXouY29tIiwiZXhwIjoxNzE2NDQ2Njc0fQ.-1EC9TcABf07Mh4iVCJlIbSi7awfmqBeJCHMo4XZZ80" localhost:3000/newsletters/4
+
+update account
+curl -X PUT --header "Content-Type: application/json" -H "Authorization: OAuth eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Inh5ekB4eXouY29tIiwiZXhwIjoxNzE2NDQ2Njc0fQ.-1EC9TcABf07Mh4iVCJlIbSi7awfmqBeJCHMo4XZZ80" --data '{"email":"xxx@xyz.com"}' localhost:3000/users
+
+delete account
+curl -X DELETE -H "Authorization: OAuth eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Inh5ekB4eXouY29tIiwiZXhwIjoxNzE2NDQ2Njc0fQ.-1EC9TcABf07Mh4iVCJlIbSi7awfmqBeJCHMo4XZZ80" localhost:3000/users
+
+cancel delete account
+curl -X POST -H "Authorization: OAuth eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Inh5ekB4eXouY29tIiwiZXhwIjoxNzE2NDQ2Njc0fQ.-1EC9TcABf07Mh4iVCJlIbSi7awfmqBeJCHMo4XZZ80" localhost:3000/users/cancel-delete

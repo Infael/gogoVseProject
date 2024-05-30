@@ -35,7 +35,7 @@ func (app *App) loadRoutes() {
 }
 
 func (app *App) loadNewslettersRoutes(router chi.Router) {
-	newsletterController := &controller.Newsletter{}
+	newsletterController := controller.NewNewsletterController(&app.services.NewsletterService, &app.services.UserService)
 
 	router.Post("/", newsletterController.Create)
 	router.Get("/", newsletterController.List)
@@ -48,10 +48,12 @@ func (app *App) loadNewslettersRoutes(router chi.Router) {
 }
 
 func (app *App) loadUserRoutes(router chi.Router) {
-	userController := &controller.User{}
+	userController := controller.NewUserController(&app.services.UserService)
 
+	router.Put("/", userController.UpdateAccount)
+	// I wanted to try asynchronous operations in Go, so I added a 60-second delay to the deletion of the user.
 	router.Delete("/", userController.DeleteAccount)
-	router.Get("/newsletters", userController.GetNewsletters)
+	router.Post("/cancel-delete", userController.CancelUserDeletion)
 }
 
 func (app *App) loadAuthRoutes(router chi.Router) {

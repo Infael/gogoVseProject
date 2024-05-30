@@ -4,7 +4,15 @@ info:
   version: 1.0.0
 servers:
   - url: http://localhost:8080
-
+tags:
+  - name: auth
+    description: Authentication endpoints
+  - name: password
+    description: Password management endpoints
+  - name: newsletters
+    description: Newsletter endpoints
+  - name: users
+    description: User endpoints
 paths:
   /:
     get:
@@ -14,6 +22,8 @@ paths:
           description: No Content
   /auth/register:
     post:
+      tags:
+        - auth
       description: Register a new user
       requestBody:
         required: true
@@ -30,6 +40,8 @@ paths:
           description: Internal server error
   /auth/login:
     post:
+      tags:
+        - auth
       description: Log in a user
       requestBody:
         required: true
@@ -52,6 +64,8 @@ paths:
           description: Internal server error
   /password/request-reset:
     post:
+      tags:
+        - password
       description: Request to get reset password link, link is valid 15 minutes
       requestBody:
         required: true
@@ -68,6 +82,8 @@ paths:
           description: Internal server error
   /password/reset/{token}:
     post:
+      tags:
+        - password
       description: Sets new password with reset token
       parameters:
         - in: path
@@ -92,6 +108,8 @@ paths:
           description: Internal server error
   /newsletters:
     post:
+      tags:
+        - newsletters
       security:
         - bearerAuth: []
       description: Create a newsletter. Created newsletter will belong to signed user.
@@ -99,7 +117,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateNewsletter"
+              $ref: "#/components/schemas/NewsletterUpdate"
       responses:
         "201":
           description: Created
@@ -110,6 +128,8 @@ paths:
         "500":
           description: Internal server error
     get:
+      tags:
+        - newsletters
       description: Get all newsletters.
       responses:
         "200":
@@ -117,11 +137,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/NewsletterList"
+                $ref: "#/components/schemas/NewsletterAllList"
         "500":
           description: Internal server error
   /newsletters/{id}:
     get:
+      tags:
+        - newsletters
       description: Get newsletter by ID
       parameters:
         - in: path
@@ -135,7 +157,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Newsletter"
+                $ref: "#/components/schemas/NewsletterAll"
         "400":
           description: Bad request
         "404":
@@ -143,6 +165,8 @@ paths:
         "500":
           description: Internal server error
     put:
+      tags:
+        - newsletters
       security:
         - bearerAuth: []
       description: Update newsletter by ID. Can be performed only as a signed in user, who is also the owner of the newsletter.
@@ -156,14 +180,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateNewsletter"
+              $ref: "#/components/schemas/NewsletterUpdate"
       responses:
         "200":
           description: Edited newsletters.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Newsletter"
+                $ref: "#/components/schemas/NewsletterAll"
         "400":
           description: Bad request
         "401":
@@ -173,6 +197,8 @@ paths:
         "500":
           description: Internal server error
     delete:
+      tags:
+        - newsletters
       security:
         - bearerAuth: []
       description: Delete newsletter by ID. Can be performed only as a signed in user, who is also the owner of the newsletter.
@@ -195,6 +221,8 @@ paths:
           description: Internal server error
   /newsletters/{id}/posts:
     post:
+      tags:
+        - newsletters
       security:
         - bearerAuth: []
       description: Create a post for a newsletter. Can be performed only as a signed in user, who is also the owner of the newsletter.
@@ -208,7 +236,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdatePost"
+              $ref: "#/components/schemas/PostUpdate"
       responses:
         "201":
           description: Created
@@ -221,6 +249,8 @@ paths:
         "500":
           description: Internal server error
     get:
+      tags:
+        - newsletters
       description: Get all posts of a newsletter.
       parameters:
         - in: path
@@ -234,7 +264,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PostList"
+                $ref: "#/components/schemas/PostAllList"
         "400":
           description: Bad request
         "404":
@@ -243,6 +273,8 @@ paths:
           description: Internal server error
   /newsletters/{id}/subscribers:
     post:
+      tags:
+        - newsletters
       description: Request subscription. Sends verification link to given email. Link is valid for 30 minutes.
       parameters:
         - in: path
@@ -265,6 +297,8 @@ paths:
         "500":
           description: Internal server error
     get:
+      tags:
+        - newsletters
       security:
         - bearerAuth: []
       description: Get all subscribers of a newsletter. Can be performed only as a signed in user, who is also the owner of the newsletter.
@@ -280,7 +314,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Subscribers"
+                $ref: "#/components/schemas/SubscriberAllList"
         "400":
           description: Bad request
         "401":
@@ -291,6 +325,8 @@ paths:
           description: Internal server error
   /newsletters/{id}/subscribers/verify/{token}:
     post:
+      tags:
+        - newsletters
       description: Confirms subscription.
       parameters:
         - in: path
@@ -314,6 +350,8 @@ paths:
           description: Internal server error
   /newsletters/{newsId}/subscribers/{subId}:
     delete:
+      tags:
+        - newsletters
       description: Unsubscribes subscriber.
       parameters:
         - in: path
@@ -336,48 +374,9 @@ paths:
         "500":
           description: Internal server error
   /users:
-    get:
-      security:
-        - bearerAuth: []
-      description: Get all users
-      responses:
-        "200":
-          description: List of all users
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/UpdateUserList"
-        "401":
-          description: Unauthorized
-        "500":
-          description: Internal server error
-  /users/{id}:
-    get:
-      security:
-        - bearerAuth: []
-      description: Get editor by ID
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: User with given id
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/User"
-        "400":
-          description: Bad request
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not found
-        "500":
-          description: Internal server error
     put:
+      tags:
+        - users
       security:
         - bearerAuth: []
       description: Update editor by ID this can be performed only on currently logged in user
@@ -391,7 +390,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateUser"
+              $ref: "#/components/schemas/UserUpdate"
       responses:
         "204":
           description: No content
@@ -404,9 +403,11 @@ paths:
         "500":
           description: Internal server error
     delete:
+      tags:
+        - users
       security:
         - bearerAuth: []
-      description: Delete editor by ID this can be performed only on currently logged in user
+      description: Schedule delete editor by ID - this can be performed only on currently logged in user, user will be deleted after some interval, this can be canceled by user
       parameters:
         - in: path
           name: id
@@ -416,6 +417,30 @@ paths:
       responses:
         "204":
           description: No content
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+        "500":
+          description: Internal server error
+  /user/cancel-delete:
+    post:
+      tags:
+        - users
+      security:
+        - bearerAuth: []
+      description: Cancel delete editor by ID - this can be performed only on currently logged in user
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Success
         "400":
           description: Bad request
         "401":
@@ -466,6 +491,7 @@ components:
         email:
           type: string
           description: Email address of the user requesting password reset
+
     User:
       type: object
       required:
@@ -480,7 +506,7 @@ components:
           type: string
           description: Email address of the user
 
-    UpdateUser:
+    UserUpdate:
       type: object
       required:
         - email
@@ -489,7 +515,7 @@ components:
           type: string
           description: Email address of the user
 
-    UpdateUserList:
+    UserList:
       description: List of users
       type: object
       properties:
@@ -498,7 +524,7 @@ components:
           items:
             $ref: "#/components/schemas/User"
 
-    UpdateNewsletter:
+    NewsletterUpdate:
       type: object
       required:
         - title
@@ -510,7 +536,7 @@ components:
           type: string
           description: Description of the newsletter
 
-    Newsletter:
+    NewsletterAll:
       type: object
       required:
         - id
@@ -528,11 +554,6 @@ components:
         description:
           type: string
           description: Description of the newsletter
-        posts:
-          type: array
-          items:
-            $ref: "#/components/schemas/Post"
-          description: List of posts in the newsletter
         created_at:
           type: string
           format: date-time
@@ -542,16 +563,16 @@ components:
           format: uint64
           description: ID of the creator of the newsletter
 
-    NewsletterList:
+    NewsletterAllList:
       description: List of newsletters
       type: object
       properties:
         newsletters:
           type: array
           items:
-            $ref: "#/components/schemas/Newsletter"
+            $ref: "#/components/schemas/NewsletterAll"
 
-    UpdatePost:
+    PostUpdate:
       type: object
       required:
         - title
@@ -564,7 +585,7 @@ components:
           type: string
           description: Body content of the post
 
-    Post:
+    PostAll:
       type: object
       required:
         - id
@@ -592,14 +613,14 @@ components:
           format: uint64
           description: ID of the newsletter associated with the post
 
-    PostList:
+    PostAllList:
       description: List of users
       type: object
       properties:
         posts:
           type: array
           items:
-            $ref: "#/components/schemas/Post"
+            $ref: "#/components/schemas/PostAll"
 
     Subscribe:
       type: object
@@ -610,17 +631,32 @@ components:
           type: string
           description: Email of subscriber.
 
-    Subscribers:
+    SubscriberAll:
+      type: object
+      required:
+        - email
+        - id
+      properties:
+        id:
+          type: integer
+          format: uint64
+          description: ID of the subscriber.
+        email:
+          type: string
+          description: Email of subscriber.
+
+    SubscriberAllList:
       description: List of users
       type: object
       properties:
-        subscribes:
+        subscribers:
           type: array
           items:
-            type: string
+            $ref: "#/components/schemas/SubscriberAll"
 
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
+

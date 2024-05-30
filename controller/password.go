@@ -20,7 +20,7 @@ func NewPasswordController(passwordService *password.PasswordService) *PasswordC
 }
 
 func (pc *PasswordController) SendResetPasswordEmail(w http.ResponseWriter, r *http.Request) {
-	var sendResetPasswordEmailRequest model.SendResetPwdEmailRequest
+	var sendResetPasswordEmailRequest model.RequestResetPasswordLink
 
 	if err := helpers.GetObjectFromJson(r, &sendResetPasswordEmailRequest); err != nil {
 		helpers.SendError(w, r, utils.ErrorBadRequest(err))
@@ -33,11 +33,10 @@ func (pc *PasswordController) SendResetPasswordEmail(w http.ResponseWriter, r *h
 	}
 
 	helpers.SendResponse(w, nil, http.StatusNoContent)
-	return
 }
 
 func (pc *PasswordController) SetNewPasswordWithResetToken(w http.ResponseWriter, r *http.Request) {
-	var sendResetPwpRequest model.ResetPwdRequest
+	var sendResetPwpRequest model.ResetPasswordAttempt
 
 	if err := helpers.GetObjectFromJson(r, &sendResetPwpRequest); err != nil {
 		helpers.SendError(w, r, utils.ErrorBadRequest(err))
@@ -51,5 +50,4 @@ func (pc *PasswordController) SetNewPasswordWithResetToken(w http.ResponseWriter
 	}
 
 	helpers.SendResponse(w, nil, http.StatusNoContent)
-	return
 }

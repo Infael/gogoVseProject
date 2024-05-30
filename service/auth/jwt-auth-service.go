@@ -52,7 +52,7 @@ func (s *JwtAuthService) Register(email, password string) error {
 	}
 
 	// Create a new user in the database
-	newUser := models.User{
+	newUser := models.UserAll{
 		PasswordHash: string(hashedPassword),
 		Email:        email,
 	}
