@@ -9,8 +9,8 @@ COPY go.mod go.sum ./
 
 # Cache mounts speed up the installation of existing dependencies,
 # empowering our image to sail smoothly through vast dependency seas.
-RUN --mount=type=cache,target=/go/pkg/mod \
-  --mount=type=cache,target=/root/.cache/go-build \
+RUN --mount=type=cache,id=go-pkg-cache,target=/go/pkg/mod \
+  --mount=type=cache,id=go-build-cache,target=/root/.cache/go-build \
   go mod download
 
 FROM build AS dev
