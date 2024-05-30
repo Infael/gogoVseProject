@@ -74,10 +74,16 @@ func (sms *StmpMailService) SendMailPasswordResetToken(user model.User, token st
 	// TODO: add correct url
 	// TODO: html template
 	url := os.Getenv("URL")
-	html := fmt.Sprintf(
-		"<h2>Password Reset Request</h2><p>We received a request to reset your password. If you did not request this, you can ignore this email.</p><hr/><p><strong>To reset your password, please click the link below:</strong> <br/><br/><a href=\"%s\">Reset Password</a></p>",
-		url+"/password/reset/"+token,
+
+	html, err := sms.parseTemplate("password-reset",
+		map[string]string{
+			"ResetLink": url + "/password/reset/" + token,
+		},
 	)
+
+	if err != nil {
+		return err
+	}
 
 	return sms.SendMailToListOfEmails([]string{user.Email}, MailContent{
 		Subject: "Password Reset Request",
