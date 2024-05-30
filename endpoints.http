@@ -1,0 +1,162 @@
+# Base URL
+@baseUrl = http://localhost:3000
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InNsaXBpa2xwQGdtYWlsLmNvbSIsImV4cCI6MTcxNzEwNDgwNX0._8ktsfLhs0HVDKyWHJiMvEianTy0zf3GmN4Cyd20plY
+@nesletterId = 1
+@subscriberId = 3
+
+
+
+# Ping the backend
+GET {{baseUrl}}/
+
+###
+
+# Register a new user
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "slipiklp@gmail.com",
+  "password": "test"
+}
+
+###
+
+# Log in a user
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "slipiklp@gmail.com",
+  "password": "test"
+}
+
+###
+
+# Request to get reset password link
+POST {{baseUrl}}/password/request-reset
+Content-Type: application/json
+
+{
+  "email": "slipiklp@gmail.com"
+}
+
+###
+
+# Set new password with reset token
+POST {{baseUrl}}/password/reset/{{token}}
+Content-Type: application/json
+
+{
+  "new_password": "newpassword123"
+}
+
+###
+
+# Create a newsletter (requires Bearer token)
+POST {{baseUrl}}/newsletters
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "title": "My Newsletter",
+  "description": "A description for my newsletter"
+}
+
+###
+
+# Get all newsletters
+GET {{baseUrl}}/newsletters
+Content-Type: application/json
+Authorization: Bearer {{token}}
+###
+
+# Get newsletter by ID
+GET {{baseUrl}}/newsletters/{{nesletterId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+###
+
+# Update newsletter by ID (requires Bearer token)
+PUT {{baseUrl}}/newsletters/{{nesletterId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "title": "Updated Title",
+  "description": "Updated Description"
+}
+
+###
+
+# Delete newsletter by ID (requires Bearer token)
+DELETE {{baseUrl}}/newsletters/{{nesletterId}}
+Authorization: Bearer {{token}}
+
+###
+
+# Create a post for a newsletter (requires Bearer token)
+POST {{baseUrl}}/newsletters/{{nesletterId}}/posts
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "title": "Hello There 3",
+  "body": "Content of the test post"
+}
+
+###
+
+# Get all posts of a newsletter
+GET {{baseUrl}}/newsletters/{{nesletterId}}/posts
+Content-Type: application/json
+Authorization: Bearer {{token}}
+###
+
+# Request subscription
+POST {{baseUrl}}/newsletters/{{nesletterId}}/subscribers
+Content-Type: application/json
+
+{
+  "email": "slipiklp@gmail.com"
+}
+
+###
+
+# Get all subscribers of a newsletter (requires Bearer token)
+GET {{baseUrl}}/newsletters/{{nesletterId}}/subscribers
+Authorization: Bearer {{token}}
+
+###
+
+# Confirm subscription
+POST {{baseUrl}}/newsletters/{{nesletterId}}/subscribers/verify/{{token}}
+
+###
+
+# Unsubscribe subscriber
+DELETE {{baseUrl}}/newsletters/{{nesletterId}}/subscribers/unsubscribe/{{subscriberId}}
+
+###
+
+# Update user (requires Bearer token)
+PUT {{baseUrl}}/users
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "email": "updateduser@example.com"
+}
+
+###
+
+# Schedule delete user (requires Bearer token)
+DELETE {{baseUrl}}/users
+Authorization: Bearer {{token}}
+
+###
+
+# Cancel delete user (requires Bearer token)
+POST {{baseUrl}}/user/cancel-delete
+Content-Type: application/json
+Authorization: Bearer {{token}}

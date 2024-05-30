@@ -61,7 +61,7 @@ func New() *App {
 		log.Fatal("failed to stmp server: %v", err)
 		panic(err)
 	}
-	user := os.Getenv("STMP_MAIL")
+	user := os.Getenv("STMP_USERNAME")
 	pwd := os.Getenv("STMP_PWD")
 	mailDialer := gomail.NewDialer(provider, port, user, pwd)
 

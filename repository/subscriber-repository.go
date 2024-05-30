@@ -9,6 +9,11 @@ import (
 	"github.com/Infael/gogoVseProject/utils"
 )
 
+type NewsletterSubscriptionResult struct {
+	Token    string
+	Verified bool
+}
+
 type SubscriberRepository struct {
 	db *db.Database
 }
@@ -18,31 +23,76 @@ func NewSubscriberRepository(db *db.Database) *SubscriberRepository {
 }
 
 // tries find subscriber, if subscriber doesnt exist he will be created
-func (repository *SubscriberRepository) CreateOrFindSubscriber(subscriber *model.SubscriberAll) (model.SubscriberAll, error) {
+func (repository *SubscriberRepository) CreateOrFindSubscriber(email string) (model.SubscriberAll, error) {
 	// Find subscriber
 	findQuery := "SELECT id FROM subscribers WHERE email = $1"
+	subscriber := model.SubscriberAll{
+		Email: email,
+	}
+
 	err := repository.db.Connection.QueryRow(findQuery, subscriber.Email).Scan(&subscriber.Id)
-	if err != sql.ErrNoRows && err != nil {
-		return *subscriber, utils.InternalServerError(err)
+	if err != nil && err != sql.ErrNoRows {
+		return subscriber, utils.InternalServerError(err)
+	}
+
+	// Return if subscriber exists
+	if err == nil {
+		return subscriber, nil
 	}
 
 	// Create subscriber
 	createQuery := "INSERT INTO subscribers (email) VALUES ($1) RETURNING id"
 	err = repository.db.Connection.QueryRow(createQuery, subscriber.Email).Scan(&subscriber.Id)
 	if err != nil {
-		return *subscriber, utils.InternalServerError(err)
+		return subscriber, utils.InternalServerError(err)
 	}
 
-	return *subscriber, nil
+	return subscriber, nil
 }
 
-func (repository *SubscriberRepository) SubscribeToNewsletter(newsletterId, subscriberId uint64) error {
-	// Create association with newsletter
-	query := "INSERT INTO newsletters_subscribers (newsletter_id, subscriber_id) VALUES ($1, $2)"
+func (repository *SubscriberRepository) SubscribeToNewsletter(newsletterId, subscriberId uint64) (NewsletterSubscriptionResult, error) {
+	newsletterSubscriptionResult := NewsletterSubscriptionResult{}
 
-	err := repository.db.Connection.QueryRow(query, newsletterId, subscriberId).Err()
+	existingSubscriptionQuery := "SELECT verification_token, verified FROM newsletters_subscribers WHERE newsletter_id = $1 AND subscriber_id = $2"
+	err := repository.db.Connection.QueryRow(existingSubscriptionQuery, newsletterId, subscriberId).Scan(&newsletterSubscriptionResult.Token, &newsletterSubscriptionResult.Verified)
+
+	// Create new subscription
 	if err != nil && err == sql.ErrNoRows {
-		return utils.ErrorNotFound(errors.New("newsletter or subscriber not found"))
+		// Create association with newsletter
+		query := "INSERT INTO newsletters_subscribers (newsletter_id, subscriber_id) VALUES ($1, $2)"
+		err := repository.db.Connection.QueryRow(query, newsletterId, subscriberId).Err()
+
+		if err != nil && err == sql.ErrNoRows {
+			return newsletterSubscriptionResult, utils.ErrorNotFound(errors.New("newsletter or subscriber not found"))
+		}
+
+		if err != nil {
+			return newsletterSubscriptionResult, utils.InternalServerError(err)
+		}
+
+		findQuery := "SELECT verified, verification_token FROM newsletters_subscribers WHERE subscriber_id = $1 AND newsletter_id = $2"
+		err = repository.db.Connection.QueryRow(findQuery, subscriberId, newsletterId).Scan(&newsletterSubscriptionResult.Verified, &newsletterSubscriptionResult.Token)
+		if err != nil {
+			return newsletterSubscriptionResult, utils.InternalServerError(err)
+		}
+
+		return newsletterSubscriptionResult, nil
+	}
+
+	if err != nil {
+		return newsletterSubscriptionResult, utils.InternalServerError(err)
+	}
+
+	return newsletterSubscriptionResult, nil
+}
+
+func (repository *SubscriberRepository) VerifySubscriber(newsletterId uint64, token string) error {
+	query := "UPDATE newsletters_subscribers SET verified = TRUE, verified_at = CURRENT_TIMESTAMP WHERE newsletter_id = $1 AND verification_token = $2"
+	err := repository.db.Connection.QueryRow(query, newsletterId, token).Err()
+
+	// Create new subscription
+	if err != nil && err == sql.ErrNoRows {
+		return utils.ErrorNotFound(errors.New("couldn't verify your subscription"))
 	}
 
 	if err != nil {
@@ -83,7 +133,7 @@ func (repository *SubscriberRepository) UnsubscribeFromNewsletter(newsletterId, 
 
 func (repository *SubscriberRepository) GetAllSubscribersOfNewsletters(newsletterId uint64) ([]model.SubscriberAll, error) {
 	// Select all subscribers by associations
-	query := "SELECT ns.newsletter_id, s.id, s.email FROM newsletters_subscribers ns JOIN subscribers s ON ns.subscriber_id = s.id"
+	query := "SELECT ns.newsletter_id, s.id, s.email FROM newsletters_subscribers ns JOIN subscribers s ON ns.subscriber_id = s.id WHERE verified = TRUE"
 	rows, err := repository.db.Connection.Query(query)
 	if err != nil {
 		return nil, utils.InternalServerError(err)
@@ -94,7 +144,7 @@ func (repository *SubscriberRepository) GetAllSubscribersOfNewsletters(newslette
 	for rows.Next() {
 		subscriber := model.SubscriberAll{}
 		var newsletterId uint64
-		err := rows.Scan(newsletterId, &subscriber.Id, &subscriber.Email)
+		err := rows.Scan(&newsletterId, &subscriber.Id, &subscriber.Email)
 		if err != nil {
 			return nil, utils.InternalServerError(err)
 		}

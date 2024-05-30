@@ -1,7 +1,12 @@
 package mail
 
 import (
+	"bytes"
 	"fmt"
+	"os"
+	"path/filepath"
+	"strconv"
+	"text/template"
 
 	"github.com/Infael/gogoVseProject/model"
 	"github.com/Infael/gogoVseProject/utils"
@@ -22,9 +27,12 @@ func (sms *StmpMailService) SendMailToListOfEmails(emails []string, mailContent 
 	// TODO: should store errors and return them
 	for _, email := range emails {
 		msg := gomail.NewMessage()
-		msg.SetHeader("From", sms.dialer.Username)
+		msg.SetHeader("From", os.Getenv("STMP_MAIL"))
 		msg.SetHeader("To", email)
 		msg.SetHeader("Subject", mailContent.Subject)
+		if mailContent.UnsubscribeUrl != "" {
+			msg.SetHeader("list-unsubscribe", mailContent.UnsubscribeUrl)
+		}
 		msg.SetBody("text/html", mailContent.Html)
 
 		if err := sms.dialer.DialAndSend(msg); err != nil {
@@ -36,28 +44,46 @@ func (sms *StmpMailService) SendMailToListOfEmails(emails []string, mailContent 
 }
 
 func (sms *StmpMailService) SendMailNewsletterPost(newsletter model.NewsletterAll, post model.PostAll, subscribers model.SubscriberAllList) error {
-	// TODO: add unsubscribe url
-	html := fmt.Sprintf(
-		"<h2>%s</h2><p>%s</p><hr/><p><strong>Created:</strong> %s, Unsubscribe from newsletter here: <a href=\"%s\">Unsubscribe</a></p>",
-		post.Title,
-		post.Body,
-		post.CreatedAt,
-		"www.dothisshitlater.com",
-	)
+	for _, subscriber := range subscribers.Subscribers {
+		urlHostname := os.Getenv("URL")
+		unsubscribeUrl := fmt.Sprintf(urlHostname+"/newsletters/%s/subscribers/unsubscribe/%s", strconv.FormatUint(newsletter.Id, 10), strconv.FormatUint(subscriber.Id, 10))
 
-	return sms.SendMailToListOfEmails(sms.getListOfEmailsFromSubscribers(subscribers), MailContent{
-		Subject: newsletter.Title,
-		Html:    html,
-	})
+		html, err := sms.parseTemplate("newsletter-template",
+			map[string]string{
+				"UnsubscribeLink": unsubscribeUrl,
+				"Title":           post.Title,
+				"Body":            post.Body,
+			},
+		)
+
+		if err != nil {
+			return err
+		}
+
+		sms.SendMailToListOfEmails([]string{subscriber.Email}, MailContent{
+			Subject:        post.Title + " - " + newsletter.Title,
+			Html:           html,
+			UnsubscribeUrl: unsubscribeUrl,
+		})
+	}
+
+	return nil
 }
 
 func (sms *StmpMailService) SendMailPasswordResetToken(user model.User, token string) error {
 	// TODO: add correct url
 	// TODO: html template
-	html := fmt.Sprintf(
-		"<h2>Password Reset Request</h2><p>We received a request to reset your password. If you did not request this, you can ignore this email.</p><hr/><p><strong>To reset your password, please click the link below:</strong> <br/><br/><a href=\"%s\">Reset Password</a></p>",
-		"http://localhost:3000/password/reset/"+token,
+	url := os.Getenv("URL")
+
+	html, err := sms.parseTemplate("password-reset",
+		map[string]string{
+			"ResetLink": url + "/password/reset/" + token,
+		},
 	)
+
+	if err != nil {
+		return err
+	}
 
 	return sms.SendMailToListOfEmails([]string{user.Email}, MailContent{
 		Subject: "Password Reset Request",
@@ -65,11 +91,39 @@ func (sms *StmpMailService) SendMailPasswordResetToken(user model.User, token st
 	})
 }
 
-func (sms *StmpMailService) getListOfEmailsFromSubscribers(listOfSubscribers model.SubscriberAllList) []string {
-	emails := []string{}
-	for _, subscriber := range listOfSubscribers.Subscribers {
-		emails = append(emails, subscriber.Email)
+func (sms *StmpMailService) SendMailSubscriptionConfirmation(subscriber model.SubscriberAll, newsletter model.NewsletterAll, token string) error {
+	urlHostname := os.Getenv("URL")
+	url := fmt.Sprintf(urlHostname+"/newsletters/%s/subscribers/verify/%s", strconv.FormatUint(newsletter.Id, 10), token)
+
+	html, err := sms.parseTemplate("newsletter-subscription-confirmation",
+		map[string]string{
+			"ConfirmationLink": url,
+		},
+	)
+
+	if err != nil {
+		return err
 	}
 
-	return emails
+	return sms.SendMailToListOfEmails([]string{subscriber.Email}, MailContent{
+		Subject: "Welcome to Our Newsletter!",
+		Html:    html,
+	})
+}
+
+func (sms *StmpMailService) parseTemplate(templateName string, data map[string]string) (string, error) {
+	rootDir, _ := os.Getwd()
+	path := filepath.Join(filepath.Join(rootDir, "templates", templateName+".html"))
+	t, err := template.ParseFiles(path)
+	if err != nil {
+		return "", err
+	}
+
+	var doc bytes.Buffer
+	err = t.Execute(&doc, data)
+	if err != nil {
+		return "", nil
+	}
+
+	return doc.String(), err
 }
